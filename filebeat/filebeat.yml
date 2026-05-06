@@ -1,0 +1,33 @@
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: false
+      templates:
+        - condition:
+            contains:
+              docker.container.name: "model_api"
+          config:
+            - type: container
+              paths:
+                - /var/lib/docker/containers/${data.container.id}/*.log
+
+processors:
+  - add_docker_metadata: ~
+  - drop_fields:
+      fields:
+        - agent
+        - ecs
+        - input
+        - host
+        - stream
+        - container
+        - docker
+        - log.offset
+        - log.file.path
+      ignore_missing: true
+
+output.logstash:
+  hosts: ["logstash:5044"]
+
+logging.level: info
+logging.to_files: false

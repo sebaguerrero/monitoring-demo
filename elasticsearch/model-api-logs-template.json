@@ -1,0 +1,44 @@
+{
+  "index_patterns": ["model-api-logs-*"],
+  "template": {
+    "settings": {
+      "analysis": {
+        "normalizer": {
+          "lowercase_normalizer": {
+            "type": "custom",
+            "char_filter": [],
+            "filter": ["lowercase"]
+          }
+        }
+      }
+    },
+    "mappings": {
+      "properties": {
+        "error_message": { "type": "keyword", "ignore_above": 4096 },
+        "summary": { "type": "keyword", "ignore_above": 1024 },
+        "prediction": { "type": "float" },
+        "latency_ms": { "type": "float" },
+        "missing_features": { "type": "keyword" },
+        "features": {
+          "properties": {
+            "square_meters": { "type": "float" },
+            "bedrooms": { "type": "integer" },
+            "neighborhood": { "type": "keyword", "normalizer": "lowercase_normalizer" }
+          }
+        }
+      },
+      "dynamic_templates": [
+        {
+          "strings_as_keyword": {
+            "match_mapping_type": "string",
+            "mapping": {
+              "type": "keyword",
+              "ignore_above": 1024,
+              "normalizer": "lowercase_normalizer"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

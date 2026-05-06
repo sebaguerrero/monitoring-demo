@@ -1,0 +1,17 @@
+{
+  "attributes": {
+    "title": "ML Drift Investigation",
+    "description": "Dashboard de 2 paneles. Fila 1 — histograma de predicciones con missing features (data skew tipo 'feature deja de estar disponible', artículo sección 3 item 2). Fila 2 — top-20 predicciones extremas con full feature context para drill-down post-alerta (monitoreo de la cola de la distribución, artículo sección 6).",
+    "panelsJSON": "[{\"version\": \"8.17.0\", \"type\": \"lens\", \"gridData\": {\"x\": 0, \"y\": 0, \"w\": 48, \"h\": 15, \"i\": \"p1\"}, \"panelIndex\": \"p1\", \"embeddableConfig\": {\"enhancements\": {}}, \"panelRefName\": \"panel_p1\"}, {\"version\": \"8.17.0\", \"type\": \"lens\", \"gridData\": {\"x\": 0, \"y\": 15, \"w\": 48, \"h\": 20, \"i\": \"p2\"}, \"panelIndex\": \"p2\", \"embeddableConfig\": {\"enhancements\": {}}, \"panelRefName\": \"panel_p2\"}]",
+    "optionsJSON": "{\"hidePanelTitles\": false, \"useMargins\": true, \"syncColors\": false, \"syncCursor\": true, \"syncTooltips\": false}",
+    "timeRestore": false,
+    "version": 1,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\": {\"language\": \"kuery\", \"query\": \"\"}, \"filter\": []}"
+    }
+  },
+  "references": [
+    { "type": "lens", "id": "prediction-with-missing", "name": "panel_p1" },
+    { "type": "lens", "id": "top-prediction-outliers", "name": "panel_p2" }
+  ]
+}

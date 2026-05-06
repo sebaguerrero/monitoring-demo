@@ -1,0 +1,47 @@
+groups:
+  - name: ml_monitoring_alerts
+    rules:
+      - alert: PredictionDriftDetected
+        expr: sum(rate(ml_prediction_value_sum[15s])) / sum(rate(ml_prediction_value_count[15s])) > 600000
+        for: 5s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Prediction drift detected"
+          description: "Average model predictions are well above the expected demo range."
+
+      - alert: HighApiLatency
+        expr: sum(rate(api_request_duration_seconds_sum[15s])) / sum(rate(api_request_duration_seconds_count[15s])) > 0.35
+        for: 5s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Operational issue: high latency"
+          description: "The ML API is taking longer than expected to respond."
+
+      - alert: ElevatedApiErrorRate
+        expr: sum(rate(api_requests_total{http_status="500"}[15s])) / sum(rate(api_requests_total[15s])) > 0.08
+        for: 5s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Operational issue: elevated error rate"
+          description: "The ML API is returning too many 500 responses."
+
+      - alert: MissingFeatureSpike
+        expr: sum(rate(ml_missing_feature_total[15s])) > 0.5
+        for: 5s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Data quality issue: missing features spike"
+          description: "Required model inputs are missing more often than expected."
+
+      - alert: ModelApiTargetDown
+        expr: up{job="house_price_predictor"} == 0
+        for: 5s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Prometheus target down"
+          description: "Prometheus cannot scrape the model API."

@@ -1,0 +1,1032 @@
+{
+  "uid": "ml-system",
+  "title": "ML System Dashboard",
+  "schemaVersion": 30,
+  "version": 5,
+  "refresh": "5s",
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "title": "Alert Status Overview",
+      "type": "row",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "title": "House Price Predictor",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DOWN"
+                },
+                "1": {
+                  "text": "UP"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "expr": "up{job=\"house_price_predictor\"}",
+          "legendFormat": "House Price Predictor",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Predict Latency",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.35
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(api_request_duration_seconds_sum{endpoint=\"/predict\"}[15s])) / sum(rate(api_request_duration_seconds_count{endpoint=\"/predict\"}[15s]))",
+          "legendFormat": "Predict Latency",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Predict Error Rate",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.08
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(api_requests_total{endpoint=\"/predict\",http_status=\"500\"}[15s])) / sum(rate(api_requests_total{endpoint=\"/predict\"}[15s]))",
+          "legendFormat": "Predict Error Rate",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Process CPU",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "expr": "avg_over_time(model_api_process_cpu_percent[15s])",
+          "legendFormat": "Process CPU",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Missing Features",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.5
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(ml_missing_feature_total[15s]))",
+          "legendFormat": "Missing Features",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Avg Prediction",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 2,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 600000
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(ml_prediction_value_sum[15s])) / sum(rate(ml_prediction_value_count[15s]))",
+          "legendFormat": "Avg Prediction",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "DevOps Metrics",
+      "type": "row",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "title": "Predict Request Rate",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 6
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(api_requests_total{endpoint=\"/predict\"}[15s]))",
+          "legendFormat": "Predict Request Rate",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Predict Latency",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 6
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          },
+          "custom": {
+            "thresholdsStyle": {
+              "mode": "line+area"
+            },
+            "axisSoftMax": 0.4
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.35
+              }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(api_request_duration_seconds_sum{endpoint=\"/predict\"}[15s])) / sum(rate(api_request_duration_seconds_count{endpoint=\"/predict\"}[15s]))",
+          "legendFormat": "Predict Latency",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Predict Error Rate",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 12
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          },
+          "custom": {
+            "thresholdsStyle": {
+              "mode": "line+area"
+            },
+            "axisSoftMax": 0.3
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.08
+              }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(api_requests_total{endpoint=\"/predict\",http_status=\"500\"}[15s])) / sum(rate(api_requests_total{endpoint=\"/predict\"}[15s]))",
+          "legendFormat": "Predict Error Rate",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Process CPU",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 12
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "avg_over_time(model_api_process_cpu_percent[15s])",
+          "legendFormat": "cpu %",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Process Memory",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 12
+      },
+      "targets": [
+        {
+          "expr": "model_api_process_resident_memory_bytes",
+          "legendFormat": "rss bytes",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Disk Utilization",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 12
+      },
+      "targets": [
+        {
+          "expr": "model_api_process_disk_utilization_percent",
+          "legendFormat": "disk %",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "ML Metrics",
+      "type": "row",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "title": "Model Identity",
+      "type": "stat",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 23
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "name",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "ml_model_info == 1",
+          "legendFormat": "Version {{version}}",
+          "refId": "A",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "title": "Prediction Mean",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 23
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          },
+          "custom": {
+            "thresholdsStyle": {
+              "mode": "line+area"
+            },
+            "axisSoftMax": 700000
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 600000
+              }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(ml_prediction_value_sum[15s])) / sum(rate(ml_prediction_value_count[15s]))",
+          "legendFormat": "mean",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Prediction Median",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 23
+      },
+      "targets": [
+        {
+          "expr": "ml_prediction_median_recent",
+          "legendFormat": "median",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Prediction Min/Max",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 23
+      },
+      "targets": [
+        {
+          "expr": "ml_prediction_min_recent",
+          "legendFormat": "min",
+          "refId": "A"
+        },
+        {
+          "expr": "ml_prediction_max_recent",
+          "legendFormat": "max",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "title": "Prediction Standard Deviation",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 28
+      },
+      "targets": [
+        {
+          "expr": "ml_prediction_stddev_recent",
+          "legendFormat": "std deviation",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Prediction Histogram Buckets",
+      "type": "bargauge",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 28
+      },
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "vertical",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(ml_prediction_value_bucket{le=\"150000.0\"}[15s])) - sum(rate(ml_prediction_value_bucket{le=\"100000.0\"}[15s]))",
+          "legendFormat": "100k-150k",
+          "refId": "A",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_prediction_value_bucket{le=\"200000.0\"}[15s])) - sum(rate(ml_prediction_value_bucket{le=\"150000.0\"}[15s]))",
+          "legendFormat": "150k-200k",
+          "refId": "B",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_prediction_value_bucket{le=\"250000.0\"}[15s])) - sum(rate(ml_prediction_value_bucket{le=\"200000.0\"}[15s]))",
+          "legendFormat": "200k-250k",
+          "refId": "C",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_prediction_value_bucket{le=\"300000.0\"}[15s])) - sum(rate(ml_prediction_value_bucket{le=\"250000.0\"}[15s]))",
+          "legendFormat": "250k-300k",
+          "refId": "D",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_prediction_value_bucket{le=\"400000.0\"}[15s])) - sum(rate(ml_prediction_value_bucket{le=\"300000.0\"}[15s]))",
+          "legendFormat": "300k-400k",
+          "refId": "E",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_prediction_value_bucket{le=\"500000.0\"}[15s])) - sum(rate(ml_prediction_value_bucket{le=\"400000.0\"}[15s]))",
+          "legendFormat": "400k-500k",
+          "refId": "F",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_prediction_value_bucket{le=\"650000.0\"}[15s])) - sum(rate(ml_prediction_value_bucket{le=\"500000.0\"}[15s]))",
+          "legendFormat": "500k-650k",
+          "refId": "G",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_prediction_value_bucket{le=\"800000.0\"}[15s])) - sum(rate(ml_prediction_value_bucket{le=\"650000.0\"}[15s]))",
+          "legendFormat": "650k-800k",
+          "refId": "H",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_prediction_value_bucket{le=\"1e+06\"}[15s])) - sum(rate(ml_prediction_value_bucket{le=\"800000.0\"}[15s]))",
+          "legendFormat": "800k-1.0M",
+          "refId": "I",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_prediction_value_bucket{le=\"1.5e+06\"}[15s])) - sum(rate(ml_prediction_value_bucket{le=\"1e+06\"}[15s]))",
+          "legendFormat": "1.0M-1.5M",
+          "refId": "J",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_prediction_value_bucket{le=\"+Inf\"}[15s])) - sum(rate(ml_prediction_value_bucket{le=\"1.5e+06\"}[15s]))",
+          "legendFormat": ">1.5M",
+          "refId": "K",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "title": "Square Meters Mean",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 34
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(ml_input_square_meters_sum[15s])) / sum(rate(ml_input_square_meters_count[15s]))",
+          "legendFormat": "avg square meters",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Square Meters Histogram Buckets",
+      "type": "bargauge",
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 8,
+        "y": 34
+      },
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "vertical",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(ml_input_square_meters_bucket{le=\"100.0\"}[15s])) - sum(rate(ml_input_square_meters_bucket{le=\"50.0\"}[15s]))",
+          "legendFormat": "50-100",
+          "refId": "A",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_input_square_meters_bucket{le=\"150.0\"}[15s])) - sum(rate(ml_input_square_meters_bucket{le=\"100.0\"}[15s]))",
+          "legendFormat": "100-150",
+          "refId": "B",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_input_square_meters_bucket{le=\"200.0\"}[15s])) - sum(rate(ml_input_square_meters_bucket{le=\"150.0\"}[15s]))",
+          "legendFormat": "150-200",
+          "refId": "C",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_input_square_meters_bucket{le=\"250.0\"}[15s])) - sum(rate(ml_input_square_meters_bucket{le=\"200.0\"}[15s]))",
+          "legendFormat": "200-250",
+          "refId": "D",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_input_square_meters_bucket{le=\"300.0\"}[15s])) - sum(rate(ml_input_square_meters_bucket{le=\"250.0\"}[15s]))",
+          "legendFormat": "250-300",
+          "refId": "E",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_input_square_meters_bucket{le=\"400.0\"}[15s])) - sum(rate(ml_input_square_meters_bucket{le=\"300.0\"}[15s]))",
+          "legendFormat": "300-400",
+          "refId": "F",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_input_square_meters_bucket{le=\"500.0\"}[15s])) - sum(rate(ml_input_square_meters_bucket{le=\"400.0\"}[15s]))",
+          "legendFormat": "400-500",
+          "refId": "G",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_input_square_meters_bucket{le=\"650.0\"}[15s])) - sum(rate(ml_input_square_meters_bucket{le=\"500.0\"}[15s]))",
+          "legendFormat": "500-650",
+          "refId": "H",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_input_square_meters_bucket{le=\"+Inf\"}[15s])) - sum(rate(ml_input_square_meters_bucket{le=\"650.0\"}[15s]))",
+          "legendFormat": ">650",
+          "refId": "I",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "title": "Bedrooms Mean",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 34
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(ml_input_bedrooms_sum[15s])) / sum(rate(ml_input_bedrooms_count[15s]))",
+          "legendFormat": "avg bedrooms",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Bedrooms Histogram Buckets",
+      "type": "bargauge",
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 40
+      },
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "vertical",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"1.0\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"0.0\"}[15s]))",
+          "legendFormat": "0-1",
+          "refId": "A",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"2.0\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"1.0\"}[15s]))",
+          "legendFormat": "1-2",
+          "refId": "B",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"3.0\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"2.0\"}[15s]))",
+          "legendFormat": "2-3",
+          "refId": "C",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"4.0\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"3.0\"}[15s]))",
+          "legendFormat": "3-4",
+          "refId": "D",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"5.0\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"4.0\"}[15s]))",
+          "legendFormat": "4-5",
+          "refId": "E",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"6.0\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"5.0\"}[15s]))",
+          "legendFormat": "5-6",
+          "refId": "F",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"7.0\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"6.0\"}[15s]))",
+          "legendFormat": "6-7",
+          "refId": "G",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"8.0\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"7.0\"}[15s]))",
+          "legendFormat": "7-8",
+          "refId": "H",
+          "instant": true
+        },
+        {
+          "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"+Inf\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"8.0\"}[15s]))",
+          "legendFormat": ">8",
+          "refId": "I",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "title": "Neighborhood Mix",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 8,
+        "y": 40
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(ml_input_neighborhood_total[15s])) by (neighborhood)",
+          "legendFormat": "{{neighborhood}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Missing Features",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 40
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          },
+          "custom": {
+            "thresholdsStyle": {
+              "mode": "line+area"
+            },
+            "axisSoftMax": 1.2
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.5
+              }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(ml_missing_feature_total[15s])) by (feature)",
+          "legendFormat": "{{feature}}",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      },
+      {
+        "builtIn": 0,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Model Deployments",
+        "type": "annotation",
+        "filter": {
+          "exclude": false,
+          "ids": [],
+          "tags": [
+            "deploy"
+          ]
+        }
+      }
+    ]
+  }
+}

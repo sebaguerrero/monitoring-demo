@@ -1,0 +1,132 @@
+{
+  "attributes": {
+    "title": "Top-20 predicciones extremas con feature context",
+    "description": "Las 20 predicciones más altas del rango temporal, con full feature context por evento. La lista está fija ordenada por prediction descendente: si reordenás clickeando otra columna en la UI solo cambiás el orden de visualización, no se re-rankea sobre otra métrica (siguen siendo las top-20 por prediction). Es la entrada al drill-down post-alerta: cuando dispara `PredictionDriftDetected` (Prometheus solo te dice 'el promedio subió'), acá ves los requests específicos que lo causaron y con qué inputs (sqm, bedrooms, neighborhood, latency, model_version, timestamp). Visualiza monitoreo de la cola de la distribución de predicciones (artículo sección 6 'estadísticas básicas: max + distribución completa').",
+    "visualizationType": "lnsDatatable",
+    "state": {
+      "datasourceStates": {
+        "formBased": {
+          "layers": {
+            "layer1": {
+              "indexPatternId": "model-api-logs",
+              "columns": {
+                "col1": {
+                  "label": "Request ID",
+                  "customLabel": true,
+                  "dataType": "string",
+                  "operationType": "terms",
+                  "sourceField": "request_id",
+                  "isBucketed": true,
+                  "scale": "ordinal",
+                  "params": {
+                    "size": 20,
+                    "orderBy": { "type": "column", "columnId": "col2" },
+                    "orderDirection": "desc",
+                    "otherBucket": false,
+                    "missingBucket": false,
+                    "parentFormat": { "id": "terms" }
+                  }
+                },
+                "col2": {
+                  "label": "Predicción ($)",
+                  "customLabel": true,
+                  "dataType": "number",
+                  "operationType": "max",
+                  "sourceField": "prediction",
+                  "isBucketed": false,
+                  "scale": "ratio"
+                },
+                "col3": {
+                  "label": "Square meters",
+                  "customLabel": true,
+                  "dataType": "number",
+                  "operationType": "max",
+                  "sourceField": "features.square_meters",
+                  "isBucketed": false,
+                  "scale": "ratio"
+                },
+                "col4": {
+                  "label": "Bedrooms",
+                  "customLabel": true,
+                  "dataType": "number",
+                  "operationType": "max",
+                  "sourceField": "features.bedrooms",
+                  "isBucketed": false,
+                  "scale": "ratio"
+                },
+                "col5": {
+                  "label": "Neighborhood",
+                  "customLabel": true,
+                  "dataType": "string",
+                  "operationType": "last_value",
+                  "sourceField": "features.neighborhood",
+                  "isBucketed": false,
+                  "scale": "ordinal",
+                  "params": { "sortField": "@timestamp" }
+                },
+                "col6": {
+                  "label": "Latencia (ms)",
+                  "customLabel": true,
+                  "dataType": "number",
+                  "operationType": "max",
+                  "sourceField": "latency_ms",
+                  "isBucketed": false,
+                  "scale": "ratio"
+                },
+                "col7": {
+                  "label": "Model version",
+                  "customLabel": true,
+                  "dataType": "string",
+                  "operationType": "last_value",
+                  "sourceField": "model_version",
+                  "isBucketed": false,
+                  "scale": "ordinal",
+                  "params": { "sortField": "@timestamp" }
+                },
+                "col8": {
+                  "label": "Timestamp",
+                  "customLabel": true,
+                  "dataType": "date",
+                  "operationType": "max",
+                  "sourceField": "@timestamp",
+                  "isBucketed": false,
+                  "scale": "ratio"
+                }
+              },
+              "columnOrder": ["col1", "col2", "col3", "col4", "col5", "col6", "col7", "col8"],
+              "incompleteColumns": {}
+            }
+          }
+        }
+      },
+      "internalReferences": [],
+      "filters": [],
+      "query": { "language": "kuery", "query": "" },
+      "visualization": {
+        "layerId": "layer1",
+        "layerType": "data",
+        "columns": [
+          { "columnId": "col1" },
+          { "columnId": "col2" },
+          { "columnId": "col3" },
+          { "columnId": "col4" },
+          { "columnId": "col5" },
+          { "columnId": "col6" },
+          { "columnId": "col7" },
+          { "columnId": "col8" }
+        ],
+        "rowHeight": "single",
+        "rowHeightLines": 1,
+        "headerRowHeight": "single",
+        "headerRowHeightLines": 1,
+        "paging": {
+          "enabled": false,
+          "size": 20
+        }
+      }
+    }
+  },
+  "references": [
+    { "type": "index-pattern", "id": "model-api-logs", "name": "indexpattern-datasource-layer-layer1" }
+  ]
+}

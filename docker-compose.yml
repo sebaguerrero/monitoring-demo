@@ -1,0 +1,174 @@
+services:
+  model_api:
+    build: ./model_api
+    ports:
+      - "8000:8000"
+    environment:
+      - MODEL_VERSION=v1.1.0-demo
+      - DEMO_BASE_RPS=8
+      - DEMO_ANOMALY_INTERVAL_SECONDS=30
+      - DEMO_ANOMALY_DURATION_SECONDS=30
+      - DEMO_ANOMALY_FAILURE_RATE=0.7
+      - DEMO_PREDICTION_STATS_WINDOW_SECONDS=300
+      - GF_ADMIN_PASSWORD=${GF_ADMIN_PASSWORD:-admin}
+    networks:
+      - monitor_net
+
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/rules.yml:/etc/prometheus/rules.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - monitor_net
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    depends_on:
+      - model_api
+
+  alertmanager:
+    image: prom/alertmanager:v0.25.0
+    volumes:
+      - ./prometheus/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    ports:
+      - "9093:9093"
+    networks:
+      - monitor_net
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+
+  panic_duty:
+    build: ./panic_duty
+    ports:
+      - "8080:8080"
+    networks:
+      - monitor_net
+
+  grafana:
+    image: grafana/grafana:10.0.3
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_ADMIN_PASSWORD:-admin}
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=${GF_ANONYMOUS_ROLE:-Admin}
+    ports:
+      - "3000:3000"
+    networks:
+      - monitor_net
+    depends_on:
+      - prometheus
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    networks:
+      - monitor_net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.17.0
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    networks:
+      - monitor_net
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.17.0
+    volumes:
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./logstash/pipeline/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+      - ./elasticsearch/model-api-logs-template.json:/usr/share/logstash/templates/model-api-logs.json:ro
+    ports:
+      - "5044:5044"
+      - "9600:9600"
+    networks:
+      - monitor_net
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:9600/_node/stats || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.17.0
+    user: root
+    command: ["filebeat", "-e", "--strict.perms=false"]
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - monitor_net
+    depends_on:
+      logstash:
+        condition: service_healthy
+      model_api:
+        condition: service_started
+
+  kibana-init:
+    image: curlimages/curl:8.5.0
+    volumes:
+      - ./kibana/init:/init:ro
+    entrypoint: ["sh", "/init/import.sh"]
+    networks:
+      - monitor_net
+    depends_on:
+      - kibana
+    restart: "no"
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy
+    profiles: ["poster"]
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      GRAFANA_HOST: ${GRAFANA_HOST:-}
+      PROMETHEUS_HOST: ${PROMETHEUS_HOST:-}
+      ALERTMANAGER_HOST: ${ALERTMANAGER_HOST:-}
+      PANICDUTY_HOST: ${PANICDUTY_HOST:-}
+      API_HOST: ${API_HOST:-}
+      KIBANA_HOST: ${KIBANA_HOST:-}
+    networks:
+      - monitor_net
+    depends_on:
+      - grafana
+      - prometheus
+      - alertmanager
+      - panic_duty
+      - model_api
+      - kibana
+
+networks:
+  monitor_net:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:

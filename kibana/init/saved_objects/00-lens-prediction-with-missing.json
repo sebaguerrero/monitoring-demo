@@ -1,0 +1,76 @@
+{
+  "attributes": {
+    "title": "Predicciones con missing features (data skew tipo feature unavailable)",
+    "description": "Distribución de prediction para eventos donde alguna feature llegó faltante en el request. En la demo solo bedrooms se omite (35% del tráfico durante anomalía); el modelo imputa ese hueco con la mediana del training set (bedrooms=3) y predice normal. La predicción es técnicamente válida (HTTP 200) pero estadísticamente débil porque acumula dos fuentes de incertidumbre: la del valor imputado (no es el dato real) y la del modelo en sí. Solo se puebla durante anomalía.",
+    "visualizationType": "lnsXY",
+    "state": {
+      "datasourceStates": {
+        "formBased": {
+          "layers": {
+            "layer1": {
+              "indexPatternId": "model-api-logs",
+              "columns": {
+                "col1": {
+                  "label": "prediction",
+                  "dataType": "number",
+                  "operationType": "range",
+                  "sourceField": "prediction",
+                  "isBucketed": true,
+                  "scale": "interval",
+                  "params": {
+                    "type": "histogram",
+                    "maxBars": 10,
+                    "ranges": [
+                      { "from": 0, "to": 1000, "label": "" }
+                    ]
+                  }
+                },
+                "col2": {
+                  "label": "Predicciones con missing features",
+                  "dataType": "number",
+                  "operationType": "count",
+                  "isBucketed": false,
+                  "scale": "ratio",
+                  "sourceField": "___records___",
+                  "filter": {
+                    "language": "kuery",
+                    "query": "missing_features: *"
+                  }
+                }
+              },
+              "columnOrder": ["col1", "col2"],
+              "incompleteColumns": {}
+            }
+          }
+        }
+      },
+      "internalReferences": [],
+      "filters": [],
+      "query": { "language": "kuery", "query": "" },
+      "visualization": {
+        "legend": { "isVisible": true, "position": "right" },
+        "valueLabels": "hide",
+        "fittingFunction": "Linear",
+        "axisTitlesVisibilitySettings": { "x": true, "yLeft": true, "yRight": true },
+        "tickLabelsVisibilitySettings": { "x": true, "yLeft": true, "yRight": true },
+        "labelsOrientation": { "x": 0, "yLeft": 0, "yRight": 0 },
+        "gridlinesVisibilitySettings": { "x": true, "yLeft": true, "yRight": true },
+        "preferredSeriesType": "bar",
+        "layers": [
+          {
+            "layerId": "layer1",
+            "accessors": ["col2"],
+            "position": "top",
+            "seriesType": "bar",
+            "showGridlines": false,
+            "layerType": "data",
+            "xAccessor": "col1"
+          }
+        ]
+      }
+    }
+  },
+  "references": [
+    { "type": "index-pattern", "id": "model-api-logs", "name": "indexpattern-datasource-layer-layer1" }
+  ]
+}

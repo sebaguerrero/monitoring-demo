@@ -181,7 +181,6 @@ _GRAFANA_PASSWORD = os.getenv("GF_ADMIN_PASSWORD", "admin")
 def _post_grafana_annotation(version: str) -> None:
     now_ms = int(time.time() * 1000)
     payload = _json.dumps({
-        "dashboardUID": "ml-system",
         "time": now_ms,
         "tags": ["deploy"],
         "text": f"Model deploy: {version}",

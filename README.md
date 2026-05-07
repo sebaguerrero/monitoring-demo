@@ -1,7 +1,8 @@
-# Monitorización de ML en Producción: Demo Local
+# Monitorización de ML en Producción: Demo
 
-## Índice
-- [Introducción](#introducción)
+Es una demo de monitorización de un sistema de ML en producción, inspirada en el artículo [Monitoring Machine Learning Models in Production](https://christophergs.com/machine%20learning/2020/03/14/how-to-monitor-machine-learning-models/) de Christopher GS. Simula una API de predicción de precios inmobiliarios que alterna entre modo normal y ventanas de anomalía cada 30 segundos, lo que dispara alertas y deja ver el comportamiento del stack de monitoreo (Prometheus, Grafana, ELK) frente a problemas típicos de ML: input drift, prediction drift, features faltantes, latencia, errores HTTP.
+
+## Tabla de contenidos
 - [Servicios](#servicios)
 - [Qué es Docker y por qué se usa](#qué-es-docker-y-por-qué-se-usa)
 - [Qué es Docker Compose y qué hace en la demo](#qué-es-docker-compose-y-qué-hace-en-la-demo)
@@ -9,17 +10,11 @@
 - [Permisos de Docker](#permisos-de-docker)
 - [Inicio rápido](#inicio-rápido)
 - [Modos de la demo](#modos-de-la-demo)
-- [Qué esperar después del arranque](#qué-esperar-después-del-arranque)
+- [Endpoints](#endpoints)
 - [Estructura de carpetas](#estructura-de-carpetas)
 - [Qué hace cada archivo](#qué-hace-cada-archivo)
-- [Despliegue público para el póster de clase](#despliegue-público-para-el-póster-de-clase)
-- [Endpoints](#endpoints)
-- [Qué mirar durante una demo](#qué-mirar-durante-una-demo)
-
-## Introducción
-
-Una demo local de monitorización de un sistema de ML en producción, inspirada en el artículo [Monitoring Machine Learning Models in Production](https://christophergs.com/machine%20learning/2020/03/14/how-to-monitor-machine-learning-models/) de Christopher GS. Simula una API de predicción de precios inmobiliarios que alterna entre modo normal y ventanas de anomalía cada 30 segundos, lo que dispara alertas y deja ver el comportamiento del stack de monitoreo (Prometheus, Grafana, Alertmanager, ELK) frente a problemas típicos de ML: input drift, prediction drift, features faltantes, latencia, errores HTTP.
-
+- [Despliegue público](#despliegue-público)
+- [Demo en funcionamiento](#demo-en-funcionamiento)
 
 ## Servicios
 
@@ -27,17 +22,17 @@ La demo combina 11 servicios. Para una explicación a fondo de cada uno (qué ha
 
 | Servicio | Rol | Doc detallada |
 |---|---|---|
-| `model_api` | API de predicción + generador de tráfico sintético + emisión de métricas y logs | [§4](docs/descripcion_demo_es.md#4-la-api-de-predicción-model_api) · [model_api_es.md](model_api/docs/model_api_es.md) |
-| `prometheus` | Recolección de métricas y evaluación de alertas | [§5](docs/descripcion_demo_es.md#5-prometheus-el-colector-de-métricas) · [prometheus_es.md](prometheus/docs/prometheus_es.md) |
-| `grafana` | Dashboard visual de métricas | [§6](docs/descripcion_demo_es.md#6-grafana-el-dashboard-de-ml) · [grafana_es.md](grafana/docs/grafana_es.md) |
-| `alertmanager` | Agrupación y enrutamiento de alertas | [§5](docs/descripcion_demo_es.md#5-prometheus-el-colector-de-métricas) · [prometheus_es.md](prometheus/docs/prometheus_es.md#alertmanageryml) |
-| `panic_duty` | Receptor de webhooks de alertas + UI mock estilo PagerDuty | [§7](docs/descripcion_demo_es.md#7-panicduty-el-receptor-de-alertas) · [panic_duty_es.md](panic_duty/docs/panic_duty_es.md) |
-| `filebeat` | Log shipper (lee stdout de `model_api` vía Docker, reenvía a Logstash) | [§8](docs/descripcion_demo_es.md#8-el-pipeline-de-logs-filebeat--logstash--elasticsearch) · [filebeat_es.md](filebeat/docs/filebeat_es.md) |
-| `logstash` | Procesador intermedio (parsea texto plano a JSON con `grok`, normaliza tipos) | [§8](docs/descripcion_demo_es.md#8-el-pipeline-de-logs-filebeat--logstash--elasticsearch) · [logstash_es.md](logstash/docs/logstash_es.md) |
-| `elasticsearch` | Almacenamiento de logs (índices diarios `model-api-logs-*`) | [§8](docs/descripcion_demo_es.md#8-el-pipeline-de-logs-filebeat--logstash--elasticsearch) · [elasticsearch_es.md](elasticsearch/docs/elasticsearch_es.md) |
-| `kibana` | UI para explorar logs (Discover + dashboard `ML Drift Investigation`) | [§9](docs/descripcion_demo_es.md#9-kibana-exploración-de-logs-y-dashboard) · [kibana_es.md](kibana/docs/kibana_es.md) |
-| `kibana-init` | Bootstrap one-shot: crea data view y aprovisiona el dashboard de Kibana | [§9](docs/descripcion_demo_es.md#9-kibana-exploración-de-logs-y-dashboard) · [kibana_es.md](kibana/docs/kibana_es.md) |
-| `caddy` *(opcional, profile `poster`)* | Reverse proxy con HTTPS automático para exponer la demo en una VM pública | [Despliegue público](#despliegue-público-para-el-póster-de-clase) |
+| `model_api` | API de predicción + generador de tráfico sintético + emisión de métricas y logs | [descripcion_demo # La API de predicción](docs/descripcion_demo_es.md#4-la-api-de-predicción-model_api)<br><br>[model_api_es.md](model_api/docs/model_api_es.md) |
+| `prometheus` | Recolección de métricas y evaluación de alertas | [descripcion_demo # Prometheus: el colector de métricas](docs/descripcion_demo_es.md#5-prometheus-el-colector-de-métricas)<br><br>[prometheus_es.md](prometheus/docs/prometheus_es.md) |
+| `grafana` | Dashboard visual de métricas | [descripcion_demo # Grafana: el dashboard de ML](docs/descripcion_demo_es.md#6-grafana-el-dashboard-de-ml)<br><br>[grafana_es.md](grafana/docs/grafana_es.md) |
+| `alertmanager` | Agrupación y enrutamiento de alertas | [descripcion_demo # Prometheus: el colector de métricas](docs/descripcion_demo_es.md#5-prometheus-el-colector-de-métricas)<br><br>[prometheus_es.md](prometheus/docs/prometheus_es.md#alertmanageryml) |
+| `panic_duty` | Receptor de webhooks de alertas + UI mock estilo PagerDuty | [descripcion_demo # PanicDuty: el receptor de alertas](docs/descripcion_demo_es.md#7-panicduty-el-receptor-de-alertas)<br><br>[panic_duty_es.md](panic_duty/docs/panic_duty_es.md) |
+| `filebeat` | Log shipper (lee stdout de `model_api` vía Docker, reenvía a Logstash) | [descripcion_demo # El pipeline de logs](docs/descripcion_demo_es.md#8-el-pipeline-de-logs-filebeat--logstash--elasticsearch)<br><br>[filebeat_es.md](filebeat/docs/filebeat_es.md) |
+| `logstash` | Procesador intermedio (parsea texto plano a JSON con `grok`, normaliza tipos) | [descripcion_demo # El pipeline de logs](docs/descripcion_demo_es.md#8-el-pipeline-de-logs-filebeat--logstash--elasticsearch)<br><br>[logstash_es.md](logstash/docs/logstash_es.md) |
+| `elasticsearch` | Almacenamiento de logs (índices diarios `model-api-logs-*`) | [descripcion_demo # El pipeline de logs](docs/descripcion_demo_es.md#8-el-pipeline-de-logs-filebeat--logstash--elasticsearch)<br><br>[elasticsearch_es.md](elasticsearch/docs/elasticsearch_es.md) |
+| `kibana` | UI para explorar logs (Discover + dashboard `ML Drift Investigation`) | [descripcion_demo # Kibana: exploración de logs y dashboard](docs/descripcion_demo_es.md#9-kibana-exploración-de-logs-y-dashboard)<br><br>[kibana_es.md](kibana/docs/kibana_es.md) |
+| `kibana-init` | Bootstrap one-shot: crea data view y aprovisiona el dashboard de Kibana | [descripcion_demo # Kibana: exploración de logs y dashboard](docs/descripcion_demo_es.md#9-kibana-exploración-de-logs-y-dashboard)<br><br>[kibana_es.md](kibana/docs/kibana_es.md) |
+| `caddy` *(opcional, profile `poster`)* | Reverse proxy con HTTPS automático para exponer la demo en una VM pública | [Despliegue público](#despliegue-público) |
 
 ## Qué es Docker y por qué se usa en la demo
 Docker es una herramienta para empaquetar aplicaciones junto con su entorno de ejecución. En la práctica, eso significa que cada parte de la demo puede correr dentro de su propio contenedor aislado, con las dependencias y la configuración que necesita.
@@ -60,6 +55,7 @@ Docker Compose es la herramienta que se usa para **definir y ejecutar varios ser
 - **Núcleo**: `model_api`, `prometheus`, `grafana`
 - **Alertas**: `alertmanager`, `panic_duty`
 - **Logs**: `elasticsearch`, `kibana`, `filebeat`, `logstash`, `kibana-init`
+- **Despliegue público** *(opcional, profile `poster`)*: `caddy` — ver [Despliegue público](#despliegue-público)
 
 Un `docker compose up` simple levanta todo. Si querés un footprint más liviano, podés nombrar un subconjunto de servicios en la línea de comandos — ver [Modos de la demo](#modos-de-la-demo) más abajo.
 
@@ -168,44 +164,35 @@ Cuándo usarlo solo: después de modificar código de la app, el `Dockerfile` o 
 
 ### Acceso
 
-Luego abra:
+| Servicio | URL | Qué podés ver |
+|---|---|---|
+| **Grafana** (home) | http://localhost:3000 | Página principal de Grafana |
+| **Grafana — ML System Dashboard** | http://localhost:3000/d/ml-system | Dashboard de métricas de ML en tiempo real (link directo) |
+| **Prometheus** (home) | http://localhost:9090 | Métricas crudas, reglas de alertas, targets |
+| **Prometheus Alerts** | http://localhost:9090/alerts | Estado de cada alerta (inactive/pending/firing) |
+| **Prometheus Targets** | http://localhost:9090/targets | Estado del scrape (UP/DOWN) hacia la API |
+| **Alertmanager** | http://localhost:9093 | Alertas activas agrupadas |
+| **PanicDuty** | http://localhost:8080 | UI con alertas disparadas en este momento |
+| **API (Swagger UI)** | http://localhost:8000/docs | Documentación interactiva de la API (predict, health, metrics) |
+| **Kibana** (home) | http://localhost:5601 | Página principal de Kibana |
+| **Kibana — Discover (logs)** | http://localhost:5601/app/discover | Listado de logs parseados con el data view `model-api-logs` (link directo) |
+| **Kibana — ML Drift Investigation Dashboard** | http://localhost:5601/app/dashboards#/view/ml-derived-fields-dashboard | Dashboard con 2 paneles Lens (predicciones con missing features, top-20 outlier predictions) |
 
-- Grafana — ML System Dashboard: [http://localhost:3000/d/ml-system](http://localhost:3000/d/ml-system) (o [http://localhost:3000](http://localhost:3000) para la página principal)
-- Prometheus: [http://localhost:9090](http://localhost:9090)
-- Health del API: [http://localhost:8000/health](http://localhost:8000/health)
-- PanicDuty (UI de alertas): [http://localhost:8080](http://localhost:8080)
-- Kibana — Discover (logs): [http://localhost:5601/app/discover](http://localhost:5601/app/discover)
-- **Kibana — Dashboard `ML Drift Investigation`**: [http://localhost:5601/app/dashboards#/view/ml-derived-fields-dashboard](http://localhost:5601/app/dashboards#/view/ml-derived-fields-dashboard)
-- Logstash monitoring API: [http://localhost:9600/_node/stats](http://localhost:9600/_node/stats)
+**En el deployment público del póster** (`make poster-up`, ver [Despliegue público](#despliegue-público) y la guía específica de [AWS](docs/aws_es.md)) las 6 herramientas listadas en el `Caddyfile` quedan detrás de subdominios HTTPS con cert de Let's Encrypt automático. Las URLs apuntan a la EIP del deployment actual (`3-226-31-220` con guiones, que sslip.io resuelve a `3.226.31.220`); si re-desplegás con otra IP, regenerá las URLs reemplazando ese tramo en cada hostname:
 
-**En el deployment público del póster** (`make poster-up`, ver [Despliegue público para el póster de clase](#despliegue-público-para-el-póster-de-clase) y la guía específica de [AWS](docs/aws_es.md)) las 6 herramientas listadas en el `Caddyfile` quedan detrás de subdominios HTTPS con cert de Let's Encrypt automático. Las URLs apuntan a la EIP del deployment actual (`3-226-31-220` con guiones, que sslip.io resuelve a `3.226.31.220`); si re-desplegás con otra IP, regenerá las URLs reemplazando ese tramo en cada hostname:
-
-- Grafana — ML System Dashboard: [https://grafana.3-226-31-220.sslip.io/d/ml-system](https://grafana.3-226-31-220.sslip.io/d/ml-system) (o [https://grafana.3-226-31-220.sslip.io](https://grafana.3-226-31-220.sslip.io) para la home)
-- Prometheus: [https://prometheus.3-226-31-220.sslip.io](https://prometheus.3-226-31-220.sslip.io)
-- Alertmanager: [https://alertmanager.3-226-31-220.sslip.io](https://alertmanager.3-226-31-220.sslip.io)
-- Health del API: [https://api.3-226-31-220.sslip.io/health](https://api.3-226-31-220.sslip.io/health)
-- API Swagger UI: [https://api.3-226-31-220.sslip.io/docs](https://api.3-226-31-220.sslip.io/docs)
-- PanicDuty (UI de alertas): [https://panicduty.3-226-31-220.sslip.io](https://panicduty.3-226-31-220.sslip.io)
-- Kibana — Discover (logs): [https://kibana.3-226-31-220.sslip.io/app/discover](https://kibana.3-226-31-220.sslip.io/app/discover)
-- **Kibana — Dashboard `ML Drift Investigation`**: [https://kibana.3-226-31-220.sslip.io/app/dashboards#/view/ml-derived-fields-dashboard](https://kibana.3-226-31-220.sslip.io/app/dashboards#/view/ml-derived-fields-dashboard)
-- Logstash monitoring API: solo desde dentro de la VM (`docker exec` o `curl localhost:9600` adentro) — no se expone afuera
-
-Qué debería pasar:
-
-- dentro de 1-2 minutos, Grafana debería mostrar tráfico sostenido,
-- poco después, las ventanas de anomalía deberían hacer que algunos paneles cambien más bruscamente,
-- las reglas de alerta visibles en http://localhost:9090/alerts pasarán a Pending/Firing durante las ventanas de anomalía,
-- en el dashboard de Kibana, el panel **Predicciones con missing features** debería poblarse durante las ventanas de anomalía cuando `bedrooms=None` dispara la imputación con mediana del training set (`bedrooms=3`), y la tabla **Top-20 outliers** debería llenarse con predicciones extremas y full feature context.
-
-En Kibana **Discover**, el data view `model-api-logs-*` ya está seleccionado por defecto (lo crea kibana-init). Desde ahí podés:
-
-- ver el stream de eventos de predicción uno por uno,
-- filtrar por campos del log: `event_type`, `http_status`, `anomaly_window`, `internal`, `features.neighborhood`, `missing_features`, `latency_ms`, `prediction`,
-- ajustar la ventana de tiempo (arriba a la derecha) para mirar las últimas predicciones o una ventana específica de anomalía.
-
-Para el **dashboard auto-provisionado** (`ML Drift Investigation`), abrí Kibana → menú hamburguesa → *Analytics → Dashboards* → seleccionar `ML Drift Investigation`. Tiene 2 paneles: predicciones con missing features (histograma) y top-20 predicciones extremas con full feature context (datatable).
-
-Si la máquina tiene poca RAM, ver [Modos de la demo](#modos-de-la-demo) para la versión mínima de 3 servicios.
+| Servicio | URL pública |
+|---|---|
+| **Grafana** (home) | [https://grafana.3-226-31-220.sslip.io](https://grafana.3-226-31-220.sslip.io) |
+| **Grafana — ML System Dashboard** | [https://grafana.3-226-31-220.sslip.io/d/ml-system](https://grafana.3-226-31-220.sslip.io/d/ml-system) |
+| **Prometheus** (home) | [https://prometheus.3-226-31-220.sslip.io](https://prometheus.3-226-31-220.sslip.io) |
+| **Prometheus Alerts** | [https://prometheus.3-226-31-220.sslip.io/alerts](https://prometheus.3-226-31-220.sslip.io/alerts) |
+| **Prometheus Targets** | [https://prometheus.3-226-31-220.sslip.io/targets](https://prometheus.3-226-31-220.sslip.io/targets) |
+| **Alertmanager** | [https://alertmanager.3-226-31-220.sslip.io](https://alertmanager.3-226-31-220.sslip.io) |
+| **PanicDuty** | [https://panicduty.3-226-31-220.sslip.io](https://panicduty.3-226-31-220.sslip.io) |
+| **API (Swagger UI)** | [https://api.3-226-31-220.sslip.io/docs](https://api.3-226-31-220.sslip.io/docs) |
+| **Kibana** (home) | [https://kibana.3-226-31-220.sslip.io](https://kibana.3-226-31-220.sslip.io) |
+| **Kibana — Discover (logs)** | [https://kibana.3-226-31-220.sslip.io/app/discover](https://kibana.3-226-31-220.sslip.io/app/discover) |
+| **Kibana — ML Drift Investigation Dashboard** | [https://kibana.3-226-31-220.sslip.io/app/dashboards#/view/ml-derived-fields-dashboard](https://kibana.3-226-31-220.sslip.io/app/dashboards#/view/ml-derived-fields-dashboard) |
 
 ## Modos de la demo
 
@@ -224,101 +211,137 @@ Es la forma recomendada para desarrollo y para presentaciones en una sola pantal
 Existe para máquinas con poca memoria que no pueden alojar Elasticsearch + Kibana + Logstash (~1.9 GB juntos). Te quedás con Grafana y Prometheus, pero perdés el enrutamiento de alertas, la UI de PanicDuty y los logs en Kibana.
 
 ### Público (póster QR / clase)
-Para exponer la demo a internet desde una VM pública — típicamente para una sesión de pósters donde códigos QR linkean a las herramientas en vivo por HTTPS. Agrega un servicio `caddy` (gateado detrás del profile `poster` de Compose) que termina TLS con certificados Let's Encrypt automáticos y hace reverse-proxy de seis herramientas (Grafana, Prometheus, Alertmanager, PanicDuty, la API del modelo y Kibana), cada una en su propio subdominio sslip.io. **No arranca por defecto en local** — solo cuando pasás `--profile poster` (o usás el atajo `make poster-up`).
+Agrega un servicio `caddy` (gateado detrás del profile `poster` de Compose) que termina TLS con certificados Let's Encrypt automáticos y hace reverse-proxy de seis herramientas (Grafana, Prometheus, Alertmanager, PanicDuty, la API del modelo y Kibana), cada una en su propio subdominio sslip.io. **No arranca por defecto en local** — solo cuando pasás `--profile poster` (o usás el atajo `make poster-up`).
 
-Para los detalles operacionales — cómo levantarlo en AWS EC2, atajos del Makefile, hardening (`GF_ANONYMOUS_ROLE=Viewer`, `GF_ADMIN_PASSWORD`), tips de QR, IPs estables — ver la sección [Despliegue público para el póster de clase](#despliegue-público-para-el-póster-de-clase) más abajo.
+Para los detalles operacionales — cómo levantarlo en AWS EC2, atajos del Makefile, hardening (`GF_ANONYMOUS_ROLE=Viewer`, `GF_ADMIN_PASSWORD`), tips de QR, IPs estables — ver la sección [Despliegue público](#despliegue-público) más abajo.
 
-## Qué esperar después del arranque
+## Endpoints
+Estos son los endpoints de aplicación expuestos por los servicios de la demo.
 
-### Dentro del primer minuto
+### `model_api`
+- `POST /predict`
+  - Endpoint principal de inferencia.
+  - Acepta un JSON opcional con campos como `square_meters`, `bedrooms` y `neighborhood`.
+  - Si no se le pasa payload (por ejemplo, desde el generador interno de tráfico), el servicio crea inputs sintéticos por sí mismo.
+  - Devuelve un precio inmobiliario sintético predicho.
+  - También registra métricas de request, inputs y predicciones.
+- `GET /metrics`
+  - Endpoint de scraping para Prometheus.
+  - Expone todas las métricas en formato texto de Prometheus.
+- `GET /health`
+  - Endpoint simple de salud.
+  - Devuelve el estado básico del servicio, la versión del modelo y si la demo está actualmente en una ventana de anomalía.
 
-**En Grafana** ([http://localhost:3000/d/ml-system](http://localhost:3000/d/ml-system)):
-- debería poblarse el panel de request rate,
-- debería verse la latencia,
-- deberían empezar a llenarse las métricas de predicción e inputs,
-- la métrica de `bedrooms` debería comenzar a actualizarse junto con el resto de inputs,
-- CPU, memoria y disco deberían ser no cero,
-- media, mediana, mínimo, máximo y desviación estándar deberían comenzar a actualizarse.
+### `panic_duty` (servicios de alertas)
+- `GET /`
+  - Página principal de la UI de PanicDuty.
+  - Muestra los incidentes activos recibidos desde Alertmanager.
+- `POST /webhook`
+  - Webhook llamado por Alertmanager.
+  - Recibe alertas firing y resolved y actualiza la lista de incidentes de PanicDuty.
 
-**En Kibana** ([http://localhost:5601/app/discover](http://localhost:5601/app/discover)):
-- los primeros documentos deberían aparecer en Discover dentro de 30-60 segundos (el tiempo que tarda Logstash en procesar el primer batch que recibe de Filebeat),
-- el data view `model-api-logs-*` ya está seleccionado por default (lo crea `kibana-init`),
-- los campos estructurados que produce el grok parsing de Logstash (`event_type`, `http_status`, `latency_ms`, `prediction`, `features.*`, `missing_features`, etc.) deberían aparecer en el sidebar de campos disponibles.
+### `logstash` (servicios de logs)
+- `GET /_node/stats` (puerto 9600) — estadísticas del nodo Logstash. El campo `pipelines.main.events.{in,filtered,out}` te dice cuántos eventos pasaron por el pipeline. Lo usa el healthcheck de Compose; útil para checks rápidos:
+  ```bash
+  curl -s http://localhost:9600/_node/stats | jq '.pipelines.main.events'
+  ```
+- `GET /_node/pipelines/main` — info detallada del pipeline (configuración cargada, métricas por filter).
+- TCP `:5044` — input `beats` (Filebeat se conecta acá). No es HTTP, no se accede con curl.
 
-### Dentro de pocos minutos
+### `elasticsearch` (servicios de logs)
+- `GET /_cluster/health` — salud del cluster (lo usa el healthcheck de Compose).
+- `GET /model-api-logs-*/_count` — conteo de eventos indexados.
+- `GET /model-api-logs-*/_search` — búsqueda/filtrado de eventos directamente vía la API de Elasticsearch. Lo usa Kibana; útil para checks rápidos por CLI.
 
-**En Grafana / PanicDuty:**
-- debería comenzar una ventana de anomalía,
-- deberían dispararse una o más alertas,
-- PanicDuty ([http://localhost:8080](http://localhost:8080)) debería mostrar incidentes activos,
-- el dashboard de Grafana debería mostrar que las métricas operativas y las métricas específicas de ML cambian juntas.
-
-**En el dashboard auto-provisionado de Kibana** ([http://localhost:5601/app/dashboards#/view/ml-derived-fields-dashboard](http://localhost:5601/app/dashboards#/view/ml-derived-fields-dashboard)):
-- el histograma **Predicciones con missing features** debería empezar vacío (durante tráfico normal no faltan features) y poblarse durante anomalías con predicciones concentradas alrededor de $1.4M-$1.8M (cuando `bedrooms=None` dispara la imputación con mediana del training set: `bedrooms=3`),
-- la tabla **Top-20 predicciones extremas con feature context** debería mostrar siempre 20 filas ordenadas por `prediction` desc, y durante anomalías las filas se dominan con predicciones $1.5M-$2.2M con `neighborhood=industrial|downtown` y `square_meters > 320` — full feature context per-evento para drill-down post-alerta.
+### `kibana` (servicios de logs)
+- `GET /` — UI principal de Kibana; navegar a **Discover** para explorar logs de predicción.
+- `GET /app/dashboards#/view/ml-derived-fields-dashboard` — dashboard auto-provisionado `ML Drift Investigation` (2 paneles: predicciones con missing features, top-20 outlier predictions).
+- `GET /api/status` — endpoint de readiness de Kibana (lo usa `kibana-init`).
+- `GET /api/data_views` — lista de data views configurados (incluye `model-api-logs`).
+- `GET /api/saved_objects/dashboard/ml-derived-fields-dashboard` — definición del dashboard auto-provisionado vía la saved-objects API.
 
 ## Estructura de carpetas
 Esta es la estructura relevante de `monitoring_demo/`:
 
 ```text
 monitoring_demo/
-├── README_EN.md
-├── README_ES.md
+├── README.md
 ├── docker-compose.yml
 ├── Makefile
 ├── Caddyfile
 ├── .env.poster.example
-├── files_root/
-│   ├── files_root_en.md
-│   └── files_root_es.md
 ├── docs/
+│   ├── README_EN.md
 │   ├── aws_en.md
 │   ├── aws_es.md
 │   ├── descripcion_demo_en.md
-│   └── descripcion_demo_es.md
-├── presentacion/             # gitignoreada — material de presentación
-│   ├── presentacion_completa.md
-│   └── presentacion_corta.md
+│   ├── descripcion_demo_es.md
+│   ├── files_root_en.md
+│   └── files_root_es.md
 ├── model_api/
 │   ├── app.py
 │   ├── Dockerfile
-│   └── requirements.txt
+│   ├── requirements.txt
+│   └── docs/
+│       ├── model_api_en.md
+│       └── model_api_es.md
 ├── prometheus/
 │   ├── prometheus.yml
 │   ├── rules.yml
-│   └── alertmanager.yml
+│   ├── alertmanager.yml
+│   └── docs/
+│       ├── prometheus_en.md
+│       └── prometheus_es.md
 ├── grafana/
 │   ├── dashboards/
 │   │   └── ml_dashboard.json
-│   └── provisioning/
-│       ├── dashboards/
-│       │   └── dashboard.yml
-│       └── datasources/
-│           └── datasource.yml
+│   ├── provisioning/
+│   │   ├── dashboards/
+│   │   │   └── dashboard.yml
+│   │   └── datasources/
+│   │       └── datasource.yml
+│   └── docs/
+│       ├── grafana_en.md
+│       └── grafana_es.md
 ├── panic_duty/
 │   ├── app.py
 │   ├── Dockerfile
 │   ├── requirements.txt
-│   └── templates/
-│       └── index.html
+│   ├── templates/
+│   │   └── index.html
+│   └── docs/
+│       ├── panic_duty_en.md
+│       └── panic_duty_es.md
 ├── filebeat/
-│   └── filebeat.yml
+│   ├── filebeat.yml
+│   └── docs/
+│       ├── filebeat_en.md
+│       └── filebeat_es.md
 ├── logstash/
 │   ├── config/
 │   │   └── logstash.yml
-│   └── pipeline/
-│       └── logstash.conf
+│   ├── pipeline/
+│   │   └── logstash.conf
+│   └── docs/
+│       ├── logstash_en.md
+│       └── logstash_es.md
 ├── elasticsearch/
-│   └── model-api-logs-template.json
+│   ├── model-api-logs-template.json
+│   └── docs/
+│       ├── elasticsearch_en.md
+│       └── elasticsearch_es.md
 └── kibana/
-    └── init/
-        ├── import.sh
-        ├── dashboards/
-        │   └── ml-derived-fields.ndjson
-        └── saved_objects/
-            ├── 00-lens-prediction-with-missing.json
-            ├── 01-lens-top-prediction-outliers.json
-            └── 05-dashboard-ml-derived-fields-dashboard.json
+    ├── init/
+    │   ├── import.sh
+    │   ├── dashboards/
+    │   │   └── ml-derived-fields.ndjson
+    │   └── saved_objects/
+    │       ├── 00-lens-prediction-with-missing.json
+    │       ├── 01-lens-top-prediction-outliers.json
+    │       └── 05-dashboard-ml-derived-fields-dashboard.json
+    └── docs/
+        ├── kibana_en.md
+        └── kibana_es.md
 ```
 
 ## Qué hace cada archivo
@@ -326,20 +349,18 @@ monitoring_demo/
 Resúmenes breves abajo; los archivos `README_ES.md` por carpeta contienen recorridos detallados.
 
 ### Archivos raíz
-> Ver [files_root_es.md](files_root/files_root_es.md) para la referencia completa de los archivos a nivel raíz.
+> Ver [files_root_es.md](docs/files_root_es.md) para la referencia completa de los archivos a nivel raíz.
 
-- `README_EN.md`
-  - Documentación en inglés de la demo.
-- `README_ES.md`
-  - Documentación en español de la demo.
+- `README.md`
+  - Documentación principal de la demo (en español). La versión en inglés está en `docs/README_EN.md`.
 - `docker-compose.yml`
-  - Define los 10 servicios distribuidos en los tres grupos lógicos (núcleo, alertas, logs). También configura puertos, redes, archivos montados, variables de entorno y el profile opcional `poster` que activa el reverse proxy Caddy para despliegues públicos.
+  - Define 11 servicios: 10 que arrancan por defecto distribuidos en tres grupos lógicos (núcleo, alertas, logs) más `caddy` gateado detrás del profile opcional `poster`. También configura puertos, redes, archivos montados, variables de entorno y el reverse proxy Caddy para despliegues públicos.
 - `Caddyfile`
   - Configuración del reverse proxy Caddy usado por el flujo de despliegue público. Lee seis hostnames de variables de entorno (Grafana, Prometheus, Alertmanager, PanicDuty, API del modelo, Kibana) y rutea cada uno al servicio que corresponda. Solo se carga cuando el profile `poster` está activo.
 - `.env.poster.example`
-  - Plantilla del archivo `.env.poster` para despliegue público (que está en gitignore). Ver [Despliegue público para el póster de clase](#despliegue-público-para-el-póster-de-clase).
+  - Plantilla del archivo `.env.poster` para despliegue público (que está en gitignore). Ver [Despliegue público](#despliegue-público).
 - `Makefile`
-  - Define targets cortos de Make (`poster-up`, `poster-down`, `poster-logs`, `poster-status`) que envuelven las invocaciones más largas de `docker compose --env-file .env.poster --profile poster ...`. Ver la subsección de atajos del Makefile en [Despliegue público para el póster de clase](#despliegue-público-para-el-póster-de-clase).
+  - Define targets cortos de Make (`poster-up`, `poster-down`, `poster-logs`, `poster-status`) que envuelven las invocaciones más largas de `docker compose --env-file .env.poster --profile poster ...`. Ver la subsección de atajos del Makefile en [Despliegue público](#despliegue-público).
 
 ### `model_api/`
 > Ver [model_api_es.md](model_api/docs/model_api_es.md) para la referencia completa.
@@ -421,8 +442,8 @@ Resúmenes breves abajo; los archivos `README_ES.md` por carpeta contienen recor
 - `kibana/init/saved_objects/*.json`
   - Los 3 saved objects descompuestos en archivos individuales en el formato `{"attributes": {...}, "references": [...]}` que el endpoint POST de Kibana espera. El prefijo numérico (`00-`, `01-`, `05-`) fuerza el orden de creación: panels primero, dashboard al final. `kibana-init` itera sobre estos archivos y POSTea cada uno a `/api/saved_objects/<type>/<id>` (POST directo evita las migraciones automáticas que romperían el formato 8.x).
 
-## Despliegue público para el póster de clase
-Esta sección es para el caso específico de levantar una copia de la demo accesible públicamente para una sesión de pósters — códigos QR en un póster, cada uno abriendo una de las seis herramientas detrás de Caddy en vivo en el navegador del teléfono.
+## Despliegue público
+Esta sección es para el caso específico de levantar una copia de la demo accesible públicamente.
 
 El repo incluye un `Caddyfile` y un servicio `caddy` (gateado detrás de un profile `poster` de Compose) que hace de reverse-proxy de seis herramientas (Grafana, Prometheus, Alertmanager, PanicDuty, la API del modelo, Kibana) en una sola VM con HTTPS. El desarrollo local no se ve afectado porque el servicio Caddy solo arranca cuando pasás `--profile poster`.
 
@@ -462,73 +483,12 @@ El repo incluye un `Makefile` con cinco targets que envuelven los comandos Compo
 
 `make` viene preinstalado en prácticamente toda máquina Linux/macOS, incluida la imagen Ubuntu de AWS EC2 a la que vas a conectarte por SSH. Las recetas son intencionalmente de una línea — leer el `Makefile` si querés ver exactamente qué hacen.
 
-### Endurecimiento
-- `.env.poster.example` ya setea `GF_ANONYMOUS_ROLE=Viewer` (solo lectura). Esto baja el rol anónimo de Grafana desde el default local `Admin`, así los que escanean el QR no pueden editar dashboards.
-- Setear `GF_ADMIN_PASSWORD` a algo fuerte antes de levantar el stack — la página es accesible desde la internet pública.
-- `.env.poster` está en gitignore — nunca commitearlo.
+## Demo en funcionamiento
 
-### Tips para los QR
-- Si codificás los hostnames de sslip.io directamente, regenerá los QR cada vez que cambie la IP pública de la VM. En AWS específicamente, asigná una Elastic IP para mantener la dirección estable entre stop/start de la instancia.
+Apenas el stack está arriba y empieza a generar tráfico, lo que se ve es esto:
 
-## Endpoints
-Estos son los endpoints de aplicación expuestos por los servicios de la demo.
-
-### `model_api`
-- `POST /predict`
-  - Endpoint principal de inferencia.
-  - Acepta un JSON opcional con campos como `square_meters`, `bedrooms` y `neighborhood`.
-  - Si no se le pasa payload (por ejemplo, desde el generador interno de tráfico), el servicio crea inputs sintéticos por sí mismo.
-  - Devuelve un precio inmobiliario sintético predicho.
-  - También registra métricas de request, inputs y predicciones.
-- `GET /metrics`
-  - Endpoint de scraping para Prometheus.
-  - Expone todas las métricas en formato texto de Prometheus.
-- `GET /health`
-  - Endpoint simple de salud.
-  - Devuelve el estado básico del servicio, la versión del modelo y si la demo está actualmente en una ventana de anomalía.
-
-### `panic_duty` (servicios de alertas)
-- `GET /`
-  - Página principal de la UI de PanicDuty.
-  - Muestra los incidentes activos recibidos desde Alertmanager.
-- `POST /webhook`
-  - Webhook llamado por Alertmanager.
-  - Recibe alertas firing y resolved y actualiza la lista de incidentes de PanicDuty.
-
-### `logstash` (servicios de logs)
-- `GET /_node/stats` (puerto 9600) — estadísticas del nodo Logstash. El campo `pipelines.main.events.{in,filtered,out}` te dice cuántos eventos pasaron por el pipeline. Lo usa el healthcheck de Compose; útil para checks rápidos:
-  ```bash
-  curl -s http://localhost:9600/_node/stats | jq '.pipelines.main.events'
-  ```
-- `GET /_node/pipelines/main` — info detallada del pipeline (configuración cargada, métricas por filter).
-- TCP `:5044` — input `beats` (Filebeat se conecta acá). No es HTTP, no se accede con curl.
-
-### `elasticsearch` (servicios de logs)
-- `GET /_cluster/health` — salud del cluster (lo usa el healthcheck de Compose).
-- `GET /model-api-logs-*/_count` — conteo de eventos indexados.
-- `GET /model-api-logs-*/_search` — búsqueda/filtrado de eventos directamente vía la API de Elasticsearch. Lo usa Kibana; útil para checks rápidos por CLI.
-
-### `kibana` (servicios de logs)
-- `GET /` — UI principal de Kibana; navegar a **Discover** para explorar logs de predicción.
-- `GET /app/dashboards#/view/ml-derived-fields-dashboard` — dashboard auto-provisionado `ML Drift Investigation` (2 paneles: predicciones con missing features, top-20 outlier predictions).
-- `GET /api/status` — endpoint de readiness de Kibana (lo usa `kibana-init`).
-- `GET /api/data_views` — lista de data views configurados (incluye `model-api-logs`).
-- `GET /api/saved_objects/dashboard/ml-derived-fields-dashboard` — definición del dashboard auto-provisionado vía la saved-objects API.
-
-## Qué mirar durante una demo
-Si va a presentar esto a otras personas, una secuencia simple es:
-
-1. Arrancar el stack.
-2. Abrir Grafana y explicar las secciones del dashboard, empezando por la fila **Alert Status Overview** arriba del todo (todos los tiles deberían estar en verde).
-3. Mostrar que el servicio ya está generando tráfico.
-4. Explicar que la monitorización tradicional de software no alcanza para ML.
-5. Esperar la ventana de anomalía.
-6. Mostrar cómo cambian latencia, errores, distribuciones de inputs y valores de predicción al mismo tiempo — y señalar cómo el/los tile(s) correspondientes del overview se ponen rojos y aparece la banda roja del umbral en los paneles de series de tiempo.
-7. Abrir PanicDuty y mostrar las alertas correspondientes.
-8. Abrir Kibana en **Discover** y mostrar el otro pilar de observabilidad — los logs por evento. Filtrar por `anomaly_window: true` para ver, request por request, qué inputs llegaron al modelo durante la ventana (barrios `industrial`, `square_meters` más grandes, `bedrooms` faltantes) y qué predicciones salieron. Esto hace concreto el punto de la **Sección 9** del artículo: las métricas resumen, los logs explican.
-
-Eso vuelve visible el argumento principal del artículo:
-
-- una infraestructura sana no implica necesariamente un comportamiento sano del modelo,
-- métricas + logs juntos cubren los dos pilares de observabilidad: agregados (Grafana) e inspección por evento (Kibana).
-
+1. **Grafana** (local: [http://localhost:3000/d/ml-system](http://localhost:3000/d/ml-system) — AWS: [https://grafana.3-226-31-220.sslip.io/d/ml-system](https://grafana.3-226-31-220.sslip.io/d/ml-system)) muestra las secciones del dashboard. La fila **Alert Status Overview** arriba del todo arranca con todos los tiles en verde.
+2. El servicio ya está generando tráfico: el panel de request rate, la latencia, las métricas de predicción y de inputs (incluida `bedrooms` y las series de CPU/memoria/disco) se pueblan en los primeros segundos. Las estadísticas rolling (media, mediana, min, max, stddev) empiezan a moverse.
+3. Pasa la primera ventana de anomalía (cada 30 segundos): latencia, errores, distribuciones de inputs y valores de predicción cambian al mismo tiempo — los tiles correspondientes del Alert Status Overview se ponen rojos.
+4. **PanicDuty** (local: [http://localhost:8080](http://localhost:8080) — AWS: [https://panicduty.3-226-31-220.sslip.io](https://panicduty.3-226-31-220.sslip.io)) muestra las alertas firing en vivo (y resolved cuando termina la ventana).
+5. **Kibana Discover** (local: [http://localhost:5601/app/discover](http://localhost:5601/app/discover) — AWS: [https://kibana.3-226-31-220.sslip.io/app/discover](https://kibana.3-226-31-220.sslip.io/app/discover)) muestra el otro pilar de observabilidad — los logs por evento. El data view `model-api-logs-*` ya está seleccionado por default (lo crea `kibana-init`). Filtrando por `anomaly_window: true` se ve, request por request, qué inputs llegaron al modelo durante la ventana (barrios `industrial`, `square_meters` más grandes, `bedrooms` faltantes) y qué predicciones salieron.6. El **dashboard auto-provisionado de Kibana** `ML Drift Investigation` (local: [http://localhost:5601/app/dashboards#/view/ml-derived-fields-dashboard](http://localhost:5601/app/dashboards#/view/ml-derived-fields-dashboard) — AWS: [https://kibana.3-226-31-220.sslip.io/app/dashboards#/view/ml-derived-fields-dashboard](https://kibana.3-226-31-220.sslip.io/app/dashboards#/view/ml-derived-fields-dashboard)) tiene 2 paneles que se pueblan durante las anomalías: el histograma **Predicciones con missing features** (vacío en tráfico normal, predicciones concentradas en $1.4M-$1.8M durante anomalías cuando `bedrooms=None` dispara la imputación con mediana del training set: `bedrooms=3`), y la tabla **Top-20 predicciones extremas con feature context** (siempre 20 filas ordenadas por `prediction` desc, dominadas durante anomalías por predicciones $1.5M-$2.2M con `neighborhood=industrial|downtown` y `square_meters > 320`).

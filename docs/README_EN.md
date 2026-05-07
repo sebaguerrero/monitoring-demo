@@ -1,7 +1,8 @@
-# ML Monitoring in Production: Local Demo
+# ML Monitoring in Production: Demo
 
-## Index
-- [Introduction](#introduction)
+It's a demo of monitoring an ML system in production, inspired by [Monitoring Machine Learning Models in Production](https://christophergs.com/machine%20learning/2020/03/14/how-to-monitor-machine-learning-models/) by Christopher GS. It simulates a real-estate price prediction API that alternates between normal mode and anomaly windows every 30 seconds, which fires alerts and exposes how the monitoring stack (Prometheus, Grafana, ELK) reacts to typical ML problems: input drift, prediction drift, missing features, latency, HTTP errors.
+
+## Table of contents
 - [Services](#services)
 - [What Docker is and why it is used](#what-docker-is-and-why-it-is-used)
 - [What Docker Compose is and what it does in the demo](#what-docker-compose-is-and-what-it-does-in-the-demo)
@@ -9,17 +10,11 @@
 - [Docker permissions](#docker-permissions)
 - [Quick start](#quick-start)
 - [Demo modes](#demo-modes)
-- [What to expect after startup](#what-to-expect-after-startup)
+- [Endpoints](#endpoints)
 - [Folder structure](#folder-structure)
 - [What each file does](#what-each-file-does)
-- [Public deployment for the class poster](#public-deployment-for-the-class-poster)
-- [Endpoints](#endpoints)
-- [What to look for during a demo](#what-to-look-for-during-a-demo)
-
-## Introduction
-
-A local demo of monitoring an ML system in production, inspired by [Monitoring Machine Learning Models in Production](https://christophergs.com/machine%20learning/2020/03/14/how-to-monitor-machine-learning-models/) by Christopher GS. It simulates a real-estate price prediction API that alternates between normal mode and anomaly windows every 30 seconds, which fires alerts and exposes how the monitoring stack (Prometheus, Grafana, Alertmanager, ELK) reacts to typical ML problems: input drift, prediction drift, missing features, latency, HTTP errors.
-
+- [Public deployment](#public-deployment)
+- [Demo running](#demo-running)
 
 ## Services
 
@@ -27,17 +22,17 @@ The demo combines 11 services. For a thorough explanation of each one (what it d
 
 | Service | Role | Detail doc |
 |---|---|---|
-| `model_api` | Prediction API + synthetic traffic generator + emits metrics and logs | [§4](docs/descripcion_demo_en.md#4-the-prediction-api-model_api) · [model_api_en.md](model_api/docs/model_api_en.md) |
-| `prometheus` | Metric collection and alert evaluation | [§5](docs/descripcion_demo_en.md#5-prometheus-the-metric-collector) · [prometheus_en.md](prometheus/docs/prometheus_en.md) |
-| `grafana` | Visual metric dashboard | [§6](docs/descripcion_demo_en.md#6-grafana-the-ml-dashboard) · [grafana_en.md](grafana/docs/grafana_en.md) |
-| `alertmanager` | Alert grouping and routing | [§5](docs/descripcion_demo_en.md#5-prometheus-the-metric-collector) · [prometheus_en.md](prometheus/docs/prometheus_en.md#alertmanageryml) |
-| `panic_duty` | Alert webhook receiver + mock PagerDuty-style UI | [§7](docs/descripcion_demo_en.md#7-panicduty-the-alert-receiver) · [panic_duty_en.md](panic_duty/docs/panic_duty_en.md) |
-| `filebeat` | Log shipper (reads `model_api` stdout via Docker, forwards to Logstash) | [§8](docs/descripcion_demo_en.md#8-the-log-pipeline-filebeat--logstash--elasticsearch) · [filebeat_en.md](filebeat/docs/filebeat_en.md) |
-| `logstash` | Intermediate processor (parses plain text to JSON via `grok`, normalizes types) | [§8](docs/descripcion_demo_en.md#8-the-log-pipeline-filebeat--logstash--elasticsearch) · [logstash_en.md](logstash/docs/logstash_en.md) |
-| `elasticsearch` | Log storage (daily `model-api-logs-*` indices) | [§8](docs/descripcion_demo_en.md#8-the-log-pipeline-filebeat--logstash--elasticsearch) · [elasticsearch_en.md](elasticsearch/docs/elasticsearch_en.md) |
-| `kibana` | UI to explore logs (Discover + `ML Drift Investigation` dashboard) | [§9](docs/descripcion_demo_en.md#9-kibana-log-exploration-and-dashboard) · [kibana_en.md](kibana/docs/kibana_en.md) |
-| `kibana-init` | One-shot bootstrap: creates the data view and provisions the Kibana dashboard | [§9](docs/descripcion_demo_en.md#9-kibana-log-exploration-and-dashboard) · [kibana_en.md](kibana/docs/kibana_en.md) |
-| `caddy` *(optional, `poster` profile)* | Reverse proxy with automatic HTTPS to expose the demo on a public VM | [Public deployment](#public-deployment-for-the-class-poster) |
+| `model_api` | Prediction API + synthetic traffic generator + emits metrics and logs | [descripcion_demo # The prediction API](docs/descripcion_demo_en.md#4-the-prediction-api-model_api)<br><br>[model_api_en.md](model_api/docs/model_api_en.md) |
+| `prometheus` | Metric collection and alert evaluation | [descripcion_demo # Prometheus: the metrics collector](docs/descripcion_demo_en.md#5-prometheus-the-metrics-collector)<br><br>[prometheus_en.md](prometheus/docs/prometheus_en.md) |
+| `grafana` | Visual metric dashboard | [descripcion_demo # Grafana: the ML dashboard](docs/descripcion_demo_en.md#6-grafana-the-ml-dashboard)<br><br>[grafana_en.md](grafana/docs/grafana_en.md) |
+| `alertmanager` | Alert grouping and routing | [descripcion_demo # Prometheus: the metrics collector](docs/descripcion_demo_en.md#5-prometheus-the-metrics-collector)<br><br>[prometheus_en.md](prometheus/docs/prometheus_en.md#alertmanageryml) |
+| `panic_duty` | Alert webhook receiver + mock PagerDuty-style UI | [descripcion_demo # PanicDuty: the alert receiver](docs/descripcion_demo_en.md#7-panicduty-the-alert-receiver)<br><br>[panic_duty_en.md](panic_duty/docs/panic_duty_en.md) |
+| `filebeat` | Log shipper (reads `model_api` stdout via Docker, forwards to Logstash) | [descripcion_demo # The logs pipeline](docs/descripcion_demo_en.md#8-the-logs-pipeline-filebeat--logstash--elasticsearch)<br><br>[filebeat_en.md](filebeat/docs/filebeat_en.md) |
+| `logstash` | Intermediate processor (parses plain text to JSON via `grok`, normalizes types) | [descripcion_demo # The logs pipeline](docs/descripcion_demo_en.md#8-the-logs-pipeline-filebeat--logstash--elasticsearch)<br><br>[logstash_en.md](logstash/docs/logstash_en.md) |
+| `elasticsearch` | Log storage (daily `model-api-logs-*` indices) | [descripcion_demo # The logs pipeline](docs/descripcion_demo_en.md#8-the-logs-pipeline-filebeat--logstash--elasticsearch)<br><br>[elasticsearch_en.md](elasticsearch/docs/elasticsearch_en.md) |
+| `kibana` | UI to explore logs (Discover + `ML Drift Investigation` dashboard) | [descripcion_demo # Kibana: log exploration and dashboard](docs/descripcion_demo_en.md#9-kibana-log-exploration-and-dashboard)<br><br>[kibana_en.md](kibana/docs/kibana_en.md) |
+| `kibana-init` | One-shot bootstrap: creates the data view and provisions the Kibana dashboard | [descripcion_demo # Kibana: log exploration and dashboard](docs/descripcion_demo_en.md#9-kibana-log-exploration-and-dashboard)<br><br>[kibana_en.md](kibana/docs/kibana_en.md) |
+| `caddy` *(optional, `poster` profile)* | Reverse proxy with automatic HTTPS to expose the demo on a public VM | [Public deployment](#public-deployment) |
 
 ## What Docker is and why it is used in the demo
 Docker is a tool for packaging applications together with their runtime environment. In practice, that means each part of the demo can run inside its own isolated container with the dependencies and configuration it needs.
@@ -60,6 +55,7 @@ Docker Compose is the tool used to **define and run multiple Docker services tog
 - **Core**: `model_api`, `prometheus`, `grafana`
 - **Alerts**: `alertmanager`, `panic_duty`
 - **Logs**: `elasticsearch`, `kibana`, `filebeat`, `logstash`, `kibana-init`
+- **Public deployment** *(optional, `poster` profile)*: `caddy` — see [Public deployment](#public-deployment)
 
 A plain `docker compose up` brings up everything. If you want a lighter footprint, you can name a subset of services on the command line — see [Demo modes](#demo-modes) below.
 
@@ -168,44 +164,35 @@ When to use it alone: after editing app code, a `Dockerfile`, or `requirements.t
 
 ### Access
 
-Then open:
+| Service | URL | What you can see |
+|---|---|---|
+| **Grafana** (home) | http://localhost:3000 | Grafana home page |
+| **Grafana — ML System Dashboard** | http://localhost:3000/d/ml-system | Real-time ML metrics dashboard (direct link) |
+| **Prometheus** (home) | http://localhost:9090 | Raw metrics, alert rules, targets |
+| **Prometheus Alerts** | http://localhost:9090/alerts | State of each alert (inactive/pending/firing) |
+| **Prometheus Targets** | http://localhost:9090/targets | Scrape status (UP/DOWN) toward the API |
+| **Alertmanager** | http://localhost:9093 | Active alerts grouped |
+| **PanicDuty** | http://localhost:8080 | UI with alerts firing right now |
+| **API (Swagger UI)** | http://localhost:8000/docs | Interactive API docs (predict, health, metrics) |
+| **Kibana** (home) | http://localhost:5601 | Kibana home page |
+| **Kibana — Discover (logs)** | http://localhost:5601/app/discover | Parsed log listing with the `model-api-logs` data view (direct link) |
+| **Kibana — ML Drift Investigation Dashboard** | http://localhost:5601/app/dashboards#/view/ml-derived-fields-dashboard | Dashboard with 2 Lens panels (predictions with missing features, top-20 outlier predictions) |
 
-- Grafana — ML System Dashboard: [http://localhost:3000/d/ml-system](http://localhost:3000/d/ml-system) (or [http://localhost:3000](http://localhost:3000) for the home page)
-- Prometheus: [http://localhost:9090](http://localhost:9090)
-- API health: [http://localhost:8000/health](http://localhost:8000/health)
-- PanicDuty (alert UI): [http://localhost:8080](http://localhost:8080)
-- Kibana — Discover (logs): [http://localhost:5601/app/discover](http://localhost:5601/app/discover)
-- **Kibana — ML Drift Investigation dashboard**: [http://localhost:5601/app/dashboards#/view/ml-derived-fields-dashboard](http://localhost:5601/app/dashboards#/view/ml-derived-fields-dashboard)
-- Logstash monitoring API: [http://localhost:9600/_node/stats](http://localhost:9600/_node/stats)
+**In the public poster deployment** (`make poster-up`, see [Public deployment](#public-deployment) and the [AWS](docs/aws_en.md)-specific guide), all 6 tools listed in the `Caddyfile` sit behind HTTPS subdomains with auto-issued Let's Encrypt certs. URLs point to the current deployment's EIP (`3-226-31-220` with dashes, which sslip.io resolves to `3.226.31.220`); if you redeploy with a different IP, regenerate them by replacing the dashed IP in each hostname:
 
-**In the public poster deployment** (`make poster-up`, see [Public deployment for the class poster](#public-deployment-for-the-class-poster) and the [AWS](docs/aws_en.md)-specific guide), all 6 tools listed in the `Caddyfile` sit behind HTTPS subdomains with auto-issued Let's Encrypt certs. URLs point to the current deployment's EIP (`3-226-31-220` with dashes, which sslip.io resolves to `3.226.31.220`); if you redeploy with a different IP, regenerate them by replacing the dashed IP in each hostname:
-
-- Grafana — ML System Dashboard: [https://grafana.3-226-31-220.sslip.io/d/ml-system](https://grafana.3-226-31-220.sslip.io/d/ml-system) (or [https://grafana.3-226-31-220.sslip.io](https://grafana.3-226-31-220.sslip.io) for the home)
-- Prometheus: [https://prometheus.3-226-31-220.sslip.io](https://prometheus.3-226-31-220.sslip.io)
-- Alertmanager: [https://alertmanager.3-226-31-220.sslip.io](https://alertmanager.3-226-31-220.sslip.io)
-- API health: [https://api.3-226-31-220.sslip.io/health](https://api.3-226-31-220.sslip.io/health)
-- API Swagger UI: [https://api.3-226-31-220.sslip.io/docs](https://api.3-226-31-220.sslip.io/docs)
-- PanicDuty (alert UI): [https://panicduty.3-226-31-220.sslip.io](https://panicduty.3-226-31-220.sslip.io)
-- Kibana — Discover (logs): [https://kibana.3-226-31-220.sslip.io/app/discover](https://kibana.3-226-31-220.sslip.io/app/discover)
-- **Kibana — ML Drift Investigation dashboard**: [https://kibana.3-226-31-220.sslip.io/app/dashboards#/view/ml-derived-fields-dashboard](https://kibana.3-226-31-220.sslip.io/app/dashboards#/view/ml-derived-fields-dashboard)
-- Logstash monitoring API: only from inside the VM (`docker exec` or `curl localhost:9600` from the host) — not exposed externally
-
-What to expect:
-
-- within 1-2 minutes, Grafana should show steady traffic,
-- soon after, anomaly windows should make some panels move more dramatically,
-- alert rules visible at http://localhost:9090/alerts will go Pending/Firing during anomaly windows,
-- in the Kibana dashboard, the **Predictions with missing features** panel should populate during anomaly windows when `bedrooms=None` triggers training-set median imputation (`bedrooms=3`), and the **Top-20 outliers** table should fill with extreme predictions and full feature context.
-
-In Kibana **Discover**, the `model-api-logs-*` data view is already selected by default (kibana-init creates it). From there you can:
-
-- watch the stream of prediction events one by one,
-- filter by log fields: `event_type`, `http_status`, `anomaly_window`, `internal`, `features.neighborhood`, `missing_features`, `latency_ms`, `prediction`,
-- adjust the time window (top right) to look at the latest predictions or a specific anomaly window.
-
-For the **auto-provisioned dashboard** (`ML Drift Investigation`), open Kibana → hamburger menu → *Analytics → Dashboards* → select `ML Drift Investigation`. It has 2 panels: predictions with missing features (histogram) and top-20 extreme predictions with full feature context (datatable).
-
-If your machine is short on RAM, see [Demo modes](#demo-modes) for the minimal 3-service experience.
+| Service | Public URL |
+|---|---|
+| **Grafana** (home) | [https://grafana.3-226-31-220.sslip.io](https://grafana.3-226-31-220.sslip.io) |
+| **Grafana — ML System Dashboard** | [https://grafana.3-226-31-220.sslip.io/d/ml-system](https://grafana.3-226-31-220.sslip.io/d/ml-system) |
+| **Prometheus** (home) | [https://prometheus.3-226-31-220.sslip.io](https://prometheus.3-226-31-220.sslip.io) |
+| **Prometheus Alerts** | [https://prometheus.3-226-31-220.sslip.io/alerts](https://prometheus.3-226-31-220.sslip.io/alerts) |
+| **Prometheus Targets** | [https://prometheus.3-226-31-220.sslip.io/targets](https://prometheus.3-226-31-220.sslip.io/targets) |
+| **Alertmanager** | [https://alertmanager.3-226-31-220.sslip.io](https://alertmanager.3-226-31-220.sslip.io) |
+| **PanicDuty** | [https://panicduty.3-226-31-220.sslip.io](https://panicduty.3-226-31-220.sslip.io) |
+| **API (Swagger UI)** | [https://api.3-226-31-220.sslip.io/docs](https://api.3-226-31-220.sslip.io/docs) |
+| **Kibana** (home) | [https://kibana.3-226-31-220.sslip.io](https://kibana.3-226-31-220.sslip.io) |
+| **Kibana — Discover (logs)** | [https://kibana.3-226-31-220.sslip.io/app/discover](https://kibana.3-226-31-220.sslip.io/app/discover) |
+| **Kibana — ML Drift Investigation Dashboard** | [https://kibana.3-226-31-220.sslip.io/app/dashboards#/view/ml-derived-fields-dashboard](https://kibana.3-226-31-220.sslip.io/app/dashboards#/view/ml-derived-fields-dashboard) |
 
 ## Demo modes
 
@@ -224,101 +211,137 @@ The recommended way for development and single-screen presentations. Shows every
 Exists for low-memory machines that can't fit Elasticsearch + Kibana + Logstash (~1.9 GB combined). You keep Grafana and Prometheus, but lose alert routing, the PanicDuty UI, and the Kibana logs.
 
 ### Public (poster QR / class)
-For exposing the demo to the internet from a public VM — typically for a poster session where QR codes link to the live tools over HTTPS. Adds a `caddy` service (gated behind Compose's `poster` profile) that terminates TLS with automatic Let's Encrypt certificates and reverse-proxies six tools (Grafana, Prometheus, Alertmanager, PanicDuty, the model API, and Kibana), each on its own sslip.io subdomain. **It does not start by default in local** — only when you pass `--profile poster` (or use the `make poster-up` shortcut).
+Adds a `caddy` service (gated behind Compose's `poster` profile) that terminates TLS with automatic Let's Encrypt certificates and reverse-proxies six tools (Grafana, Prometheus, Alertmanager, PanicDuty, the model API, and Kibana), each on its own sslip.io subdomain. **It does not start by default in local** — only when you pass `--profile poster` (or use the `make poster-up` shortcut).
 
-For operational details — how to bring it up on AWS EC2, Makefile shortcuts, hardening (`GF_ANONYMOUS_ROLE=Viewer`, `GF_ADMIN_PASSWORD`), QR tips, stable IPs — see the [Public deployment for the class poster](#public-deployment-for-the-class-poster) section below.
+For operational details — how to bring it up on AWS EC2, Makefile shortcuts, hardening (`GF_ANONYMOUS_ROLE=Viewer`, `GF_ADMIN_PASSWORD`), QR tips, stable IPs — see the [Public deployment](#public-deployment) section below.
 
-## What to expect after startup
+## Endpoints
+These are the application endpoints exposed by the services in the demo.
 
-### Within the first minute
+### `model_api`
+- `POST /predict`
+  - Main inference endpoint.
+  - Accepts an optional JSON payload with fields such as `square_meters`, `bedrooms`, and `neighborhood`.
+  - If no payload is provided (e.g., from the internal traffic generator), the service synthesizes its own inputs.
+  - Returns a synthetic predicted house price.
+  - Also records request, input, and prediction metrics.
+- `GET /metrics`
+  - Prometheus scrape endpoint.
+  - Exposes all exported metrics in Prometheus text format.
+- `GET /health`
+  - Simple health endpoint.
+  - Returns basic service status, model version, and whether the demo is currently in an anomaly window.
 
-**In Grafana** ([http://localhost:3000/d/ml-system](http://localhost:3000/d/ml-system)):
-- the request-rate panel should populate,
-- latency should be visible,
-- prediction and input metrics should start filling in,
-- the `bedrooms` metric should begin updating with the other input metrics,
-- CPU, memory, and disk metrics should be non-zero,
-- rolling mean, median, min, max, and stddev should begin updating.
+### `panic_duty` (alerts services)
+- `GET /`
+  - Main PanicDuty UI page.
+  - Shows active incidents received from Alertmanager.
+- `POST /webhook`
+  - Webhook endpoint called by Alertmanager.
+  - Receives firing and resolved alerts and updates the PanicDuty incident list.
 
-**In Kibana** ([http://localhost:5601/app/discover](http://localhost:5601/app/discover)):
-- the first documents should appear in Discover within 30-60 seconds (the time it takes Logstash to process the first batch it receives from Filebeat),
-- the `model-api-logs-*` data view is already selected by default (created by `kibana-init`),
-- the structured fields from Logstash parsing (`event_type`, `http_status`, `latency_ms`, `prediction`, `features.*`, `missing_features`, etc.) should appear in the available-fields sidebar.
+### `logstash` (logs services)
+- `GET /_node/stats` (port 9600) — Logstash node stats. The `pipelines.main.events.{in,filtered,out}` field tells you how many events flowed through the pipeline. Used by the Compose healthcheck; useful for quick checks:
+  ```bash
+  curl -s http://localhost:9600/_node/stats | jq '.pipelines.main.events'
+  ```
+- `GET /_node/pipelines/main` — detailed pipeline info (loaded configuration, per-filter metrics).
+- TCP `:5044` — `beats` input (Filebeat connects here). Not HTTP, not accessible with curl.
 
-### Within a few minutes
+### `elasticsearch` (logs services)
+- `GET /_cluster/health` — cluster health (used by the Compose healthcheck).
+- `GET /model-api-logs-*/_count` — count of indexed prediction events.
+- `GET /model-api-logs-*/_search` — search/filter events directly via the Elasticsearch API. Mostly used by Kibana; useful for quick CLI checks.
 
-**In Grafana / PanicDuty:**
-- the anomaly window should begin,
-- one or more alerts should fire,
-- PanicDuty ([http://localhost:8080](http://localhost:8080)) should display active incidents,
-- the Grafana dashboard should show that operational and ML-specific metrics are changing together.
-
-**In the auto-provisioned Kibana dashboard** ([http://localhost:5601/app/dashboards#/view/ml-derived-fields-dashboard](http://localhost:5601/app/dashboards#/view/ml-derived-fields-dashboard)):
-- the **Predictions with missing features** histogram should start empty (during normal traffic, no features are missing) and populate during anomalies with predictions concentrated around $1.4M-$1.8M (when `bedrooms=None` triggers training-set median imputation: `bedrooms=3`),
-- the **Top-20 extreme predictions with feature context** datatable should always show 20 rows ordered by `prediction` desc, and during anomalies the rows are dominated by predictions $1.5M-$2.2M with `neighborhood=industrial|downtown` and `square_meters > 320` — full per-event feature context for post-alert drill-down.
+### `kibana` (logs services)
+- `GET /` — main Kibana UI; navigate to **Discover** to explore prediction logs.
+- `GET /app/dashboards#/view/ml-derived-fields-dashboard` — auto-provisioned `ML Drift Investigation` dashboard (2 panels: predictions with missing features, top-20 outlier predictions).
+- `GET /api/status` — Kibana readiness endpoint (used by `kibana-init`).
+- `GET /api/data_views` — list of configured data views (includes `model-api-logs`).
+- `GET /api/saved_objects/dashboard/ml-derived-fields-dashboard` — auto-provisioned dashboard definition via the saved-objects API.
 
 ## Folder structure
 This is the relevant structure of `monitoring_demo/`:
 
 ```text
 monitoring_demo/
-├── README_EN.md
-├── README_ES.md
+├── README.md
 ├── docker-compose.yml
 ├── Makefile
 ├── Caddyfile
 ├── .env.poster.example
-├── files_root/
-│   ├── files_root_en.md
-│   └── files_root_es.md
 ├── docs/
+│   ├── README_EN.md
 │   ├── aws_en.md
 │   ├── aws_es.md
 │   ├── descripcion_demo_en.md
-│   └── descripcion_demo_es.md
-├── presentacion/             # gitignored — presentation materials
-│   ├── presentacion_completa.md
-│   └── presentacion_corta.md
+│   ├── descripcion_demo_es.md
+│   ├── files_root_en.md
+│   └── files_root_es.md
 ├── model_api/
 │   ├── app.py
 │   ├── Dockerfile
-│   └── requirements.txt
+│   ├── requirements.txt
+│   └── docs/
+│       ├── model_api_en.md
+│       └── model_api_es.md
 ├── prometheus/
 │   ├── prometheus.yml
 │   ├── rules.yml
-│   └── alertmanager.yml
+│   ├── alertmanager.yml
+│   └── docs/
+│       ├── prometheus_en.md
+│       └── prometheus_es.md
 ├── grafana/
 │   ├── dashboards/
 │   │   └── ml_dashboard.json
-│   └── provisioning/
-│       ├── dashboards/
-│       │   └── dashboard.yml
-│       └── datasources/
-│           └── datasource.yml
+│   ├── provisioning/
+│   │   ├── dashboards/
+│   │   │   └── dashboard.yml
+│   │   └── datasources/
+│   │       └── datasource.yml
+│   └── docs/
+│       ├── grafana_en.md
+│       └── grafana_es.md
 ├── panic_duty/
 │   ├── app.py
 │   ├── Dockerfile
 │   ├── requirements.txt
-│   └── templates/
-│       └── index.html
+│   ├── templates/
+│   │   └── index.html
+│   └── docs/
+│       ├── panic_duty_en.md
+│       └── panic_duty_es.md
 ├── filebeat/
-│   └── filebeat.yml
+│   ├── filebeat.yml
+│   └── docs/
+│       ├── filebeat_en.md
+│       └── filebeat_es.md
 ├── logstash/
 │   ├── config/
 │   │   └── logstash.yml
-│   └── pipeline/
-│       └── logstash.conf
+│   ├── pipeline/
+│   │   └── logstash.conf
+│   └── docs/
+│       ├── logstash_en.md
+│       └── logstash_es.md
 ├── elasticsearch/
-│   └── model-api-logs-template.json
+│   ├── model-api-logs-template.json
+│   └── docs/
+│       ├── elasticsearch_en.md
+│       └── elasticsearch_es.md
 └── kibana/
-    └── init/
-        ├── import.sh
-        ├── dashboards/
-        │   └── ml-derived-fields.ndjson
-        └── saved_objects/
-            ├── 00-lens-prediction-with-missing.json
-            ├── 01-lens-top-prediction-outliers.json
-            └── 05-dashboard-ml-derived-fields-dashboard.json
+    ├── init/
+    │   ├── import.sh
+    │   ├── dashboards/
+    │   │   └── ml-derived-fields.ndjson
+    │   └── saved_objects/
+    │       ├── 00-lens-prediction-with-missing.json
+    │       ├── 01-lens-top-prediction-outliers.json
+    │       └── 05-dashboard-ml-derived-fields-dashboard.json
+    └── docs/
+        ├── kibana_en.md
+        └── kibana_es.md
 ```
 
 ## What each file does
@@ -326,20 +349,18 @@ monitoring_demo/
 Quick summaries below; per-folder `README_EN.md` files contain thorough walkthroughs.
 
 ### Root files
-> See [files_root_en.md](files_root/files_root_en.md) for the full reference of root-level files.
+> See [files_root_en.md](files_root_en.md) for the full reference of root-level files.
 
-- `README_EN.md`
-  - English documentation for the demo.
-- `README_ES.md`
-  - Spanish documentation for the demo.
+- `README.md`
+  - Main demo documentation (in Spanish). The English version is at `docs/README_EN.md`.
 - `docker-compose.yml`
-  - Defines all 10 services across the three logical groups (core, alerts, logs). Also configures ports, networks, mounted files, environment variables, and the optional `poster` profile that enables the Caddy reverse proxy for public deployments.
+  - Defines 11 services: 10 that start by default across three logical groups (core, alerts, logs) plus `caddy` gated behind the optional `poster` profile. Also configures ports, networks, mounted files, environment variables, and the Caddy reverse proxy for public deployments.
 - `Caddyfile`
   - Caddy reverse-proxy configuration used by the public-deployment workflow. Reads six hostnames from environment variables (Grafana, Prometheus, Alertmanager, PanicDuty, model API, Kibana) and routes each one to the matching service. Only loaded when `--profile poster` is active.
 - `.env.poster.example`
-  - Template for the public-deployment `.env.poster` file (which is gitignored). See [Public deployment for the class poster](#public-deployment-for-the-class-poster).
+  - Template for the public-deployment `.env.poster` file (which is gitignored). See [Public deployment](#public-deployment).
 - `Makefile`
-  - Defines short Make targets (`poster-up`, `poster-down`, `poster-logs`, `poster-status`) that wrap the longer `docker compose --env-file .env.poster --profile poster ...` invocations. See the Makefile shortcuts subsection in [Public deployment for the class poster](#public-deployment-for-the-class-poster).
+  - Defines short Make targets (`poster-up`, `poster-down`, `poster-logs`, `poster-status`) that wrap the longer `docker compose --env-file .env.poster --profile poster ...` invocations. See the Makefile shortcuts subsection in [Public deployment](#public-deployment).
 
 ### `model_api/`
 > See [model_api_en.md](model_api/docs/model_api_en.md) for the full reference.
@@ -421,8 +442,8 @@ Quick summaries below; per-folder `README_EN.md` files contain thorough walkthro
 - `kibana/init/saved_objects/*.json`
   - The 3 saved objects split into individual files in the `{"attributes": {...}, "references": [...]}` format the Kibana POST endpoint expects. The numeric prefix (`00-`, `01-`, `05-`) forces creation order: panels first, dashboard last. `kibana-init` iterates over these files and POSTs each one to `/api/saved_objects/<type>/<id>` (direct POST avoids automatic migrations that would break the 8.x format).
 
-## Public deployment for the class poster
-This section is for the specific case of standing up a publicly reachable copy of the demo for a poster session — QR codes on a poster, each opening one of the six live tools in a phone browser.
+## Public deployment
+This section is for the specific case of standing up a publicly reachable copy of the demo.
 
 The repo includes a `Caddyfile` and a `caddy` service (gated behind a `poster` Compose profile) that reverse-proxies six tools (Grafana, Prometheus, Alertmanager, PanicDuty, the model API, Kibana) on a single VM behind HTTPS. Local development is unaffected because the Caddy service only starts when you pass `--profile poster`.
 
@@ -462,73 +483,12 @@ The repo includes a `Makefile` with five targets that wrap the Compose commands 
 
 `make` is preinstalled on essentially every Linux/macOS machine, including the AWS EC2 Ubuntu image you'll SSH into. Recipes are intentionally one-liners — read the `Makefile` if you want to see exactly what they do.
 
-### Hardening
-- `.env.poster.example` already sets `GF_ANONYMOUS_ROLE=Viewer` (read-only). This downgrades the anonymous Grafana role from the local default `Admin`, so QR scanners cannot edit dashboards.
-- Set `GF_ADMIN_PASSWORD` to something strong before bringing the stack up — the page is reachable from the public internet.
-- `.env.poster` is gitignored — never commit it.
+## Demo running
 
-### QR generation tips
-- If you do encode the sslip.io hostnames directly, regenerate the QRs every time the VM's public IP changes. On AWS specifically, allocate an Elastic IP to keep the address stable across instance stop/start.
+Once the stack is up and starts producing traffic, what you see is this:
 
-## Endpoints
-These are the application endpoints exposed by the services in the demo.
-
-### `model_api`
-- `POST /predict`
-  - Main inference endpoint.
-  - Accepts an optional JSON payload with fields such as `square_meters`, `bedrooms`, and `neighborhood`.
-  - If no payload is provided (e.g., from the internal traffic generator), the service synthesizes its own inputs.
-  - Returns a synthetic predicted house price.
-  - Also records request, input, and prediction metrics.
-- `GET /metrics`
-  - Prometheus scrape endpoint.
-  - Exposes all exported metrics in Prometheus text format.
-- `GET /health`
-  - Simple health endpoint.
-  - Returns basic service status, model version, and whether the demo is currently in an anomaly window.
-
-### `panic_duty` (alerts services)
-- `GET /`
-  - Main PanicDuty UI page.
-  - Shows active incidents received from Alertmanager.
-- `POST /webhook`
-  - Webhook endpoint called by Alertmanager.
-  - Receives firing and resolved alerts and updates the PanicDuty incident list.
-
-### `logstash` (logs services)
-- `GET /_node/stats` (port 9600) — Logstash node stats. The `pipelines.main.events.{in,filtered,out}` field tells you how many events flowed through the pipeline. Used by the Compose healthcheck; useful for quick checks:
-  ```bash
-  curl -s http://localhost:9600/_node/stats | jq '.pipelines.main.events'
-  ```
-- `GET /_node/pipelines/main` — detailed pipeline info (loaded configuration, per-filter metrics).
-- TCP `:5044` — `beats` input (Filebeat connects here). Not HTTP, not accessible with curl.
-
-### `elasticsearch` (logs services)
-- `GET /_cluster/health` — cluster health (used by the Compose healthcheck).
-- `GET /model-api-logs-*/_count` — count of indexed prediction events.
-- `GET /model-api-logs-*/_search` — search/filter events directly via the Elasticsearch API. Mostly used by Kibana; useful for quick CLI checks.
-
-### `kibana` (logs services)
-- `GET /` — main Kibana UI; navigate to **Discover** to explore prediction logs.
-- `GET /app/dashboards#/view/ml-derived-fields-dashboard` — auto-provisioned `ML Drift Investigation` dashboard (2 panels: predictions with missing features, top-20 outlier predictions).
-- `GET /api/status` — Kibana readiness endpoint (used by `kibana-init`).
-- `GET /api/data_views` — list of configured data views (includes `model-api-logs`).
-- `GET /api/saved_objects/dashboard/ml-derived-fields-dashboard` — auto-provisioned dashboard definition via the saved-objects API.
-
-## What to look for during a demo
-If you are presenting this to other people, a simple script is:
-
-1. Start the stack.
-2. Open Grafana and explain the dashboard sections, starting from the **Alert Status Overview** row at the top (all tiles should be green).
-3. Show that the service is already producing traffic.
-4. Explain that normal software monitoring is not enough for ML.
-5. Wait for the anomaly window.
-6. Show latency, errors, input distributions, and prediction values changing together — and point out the corresponding overview tile(s) turning red and the red threshold band appearing on the time-series panels.
-7. Open PanicDuty and show the corresponding alerts.
-8. Open Kibana in **Discover** and show the other observability pillar — per-event logs. Filter by `anomaly_window: true` to see, request by request, which inputs reached the model during the window (`industrial` neighborhoods, larger `square_meters`, missing `bedrooms`) and what predictions came back. This makes the article's **Section 9** point concrete: metrics summarize, logs explain.
-
-That makes the article's core argument visible:
-
-- healthy infrastructure is not the same as healthy model behavior,
-- metrics + logs together cover the two pillars of observability: aggregates (Grafana) and per-event inspection (Kibana).
-
+1. **Grafana** (local: [http://localhost:3000/d/ml-system](http://localhost:3000/d/ml-system) — AWS: [https://grafana.3-226-31-220.sslip.io/d/ml-system](https://grafana.3-226-31-220.sslip.io/d/ml-system)) shows the dashboard sections. The **Alert Status Overview** row at the top starts with all tiles green.
+2. The service is already producing traffic: the request-rate panel, latency, prediction and input metrics (including `bedrooms` and the CPU/memory/disk series) populate in the first few seconds. Rolling stats (mean, median, min, max, stddev) start moving.
+3. The first anomaly window arrives (every 30 seconds): latency, errors, input distributions, and prediction values change together — the corresponding Alert Status Overview tiles turn red.
+4. **PanicDuty** (local: [http://localhost:8080](http://localhost:8080) — AWS: [https://panicduty.3-226-31-220.sslip.io](https://panicduty.3-226-31-220.sslip.io)) shows the firing alerts in real time (and resolved when the window ends).
+5. **Kibana Discover** (local: [http://localhost:5601/app/discover](http://localhost:5601/app/discover) — AWS: [https://kibana.3-226-31-220.sslip.io/app/discover](https://kibana.3-226-31-220.sslip.io/app/discover)) shows the other observability pillar — per-event logs. The `model-api-logs-*` data view is already selected by default (created by `kibana-init`). Filtering by `anomaly_window: true` shows, request by request, which inputs reached the model during the window (`industrial` neighborhoods, larger `square_meters`, missing `bedrooms`) and what predictions came back.6. The **auto-provisioned Kibana dashboard** `ML Drift Investigation` (local: [http://localhost:5601/app/dashboards#/view/ml-derived-fields-dashboard](http://localhost:5601/app/dashboards#/view/ml-derived-fields-dashboard) — AWS: [https://kibana.3-226-31-220.sslip.io/app/dashboards#/view/ml-derived-fields-dashboard](https://kibana.3-226-31-220.sslip.io/app/dashboards#/view/ml-derived-fields-dashboard)) has 2 panels that populate during anomalies: the **Predictions with missing features** histogram (empty during normal traffic, predictions concentrated around $1.4M-$1.8M during anomalies when `bedrooms=None` triggers training-set median imputation: `bedrooms=3`), and the **Top-20 extreme predictions with feature context** datatable (always 20 rows ordered by `prediction` desc, dominated during anomalies by predictions $1.5M-$2.2M with `neighborhood=industrial|downtown` and `square_meters > 320`).

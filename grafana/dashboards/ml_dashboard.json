@@ -2,7 +2,7 @@
   "uid": "ml-system",
   "title": "ML System Dashboard",
   "schemaVersion": 30,
-  "version": 5,
+  "version": 6,
   "refresh": "5s",
   "time": {
     "from": "now-15m",
@@ -79,7 +79,8 @@
         {
           "expr": "up{job=\"house_price_predictor\"}",
           "legendFormat": "House Price Predictor",
-          "refId": "A"
+          "refId": "A",
+          "interval": "5s"
         }
       ]
     },
@@ -129,7 +130,8 @@
         {
           "expr": "sum(rate(api_request_duration_seconds_sum{endpoint=\"/predict\"}[15s])) / sum(rate(api_request_duration_seconds_count{endpoint=\"/predict\"}[15s]))",
           "legendFormat": "Predict Latency",
-          "refId": "A"
+          "refId": "A",
+          "interval": "5s"
         }
       ]
     },
@@ -179,7 +181,8 @@
         {
           "expr": "sum(rate(api_requests_total{endpoint=\"/predict\",http_status=\"500\"}[15s])) / sum(rate(api_requests_total{endpoint=\"/predict\"}[15s]))",
           "legendFormat": "Predict Error Rate",
-          "refId": "A"
+          "refId": "A",
+          "interval": "5s"
         }
       ]
     },
@@ -217,7 +220,8 @@
         {
           "expr": "avg_over_time(model_api_process_cpu_percent[15s])",
           "legendFormat": "Process CPU",
-          "refId": "A"
+          "refId": "A",
+          "interval": "5s"
         }
       ]
     },
@@ -266,7 +270,8 @@
         {
           "expr": "sum(rate(ml_missing_feature_total[15s]))",
           "legendFormat": "Missing Features",
-          "refId": "A"
+          "refId": "A",
+          "interval": "5s"
         }
       ]
     },
@@ -317,7 +322,8 @@
         {
           "expr": "sum(rate(ml_prediction_value_sum[15s])) / sum(rate(ml_prediction_value_count[15s]))",
           "legendFormat": "Avg Prediction",
-          "refId": "A"
+          "refId": "A",
+          "interval": "5s"
         }
       ]
     },
@@ -346,7 +352,8 @@
         {
           "expr": "sum(rate(api_requests_total{endpoint=\"/predict\"}[15s]))",
           "legendFormat": "Predict Request Rate",
-          "refId": "A"
+          "refId": "A",
+          "interval": "5s"
         }
       ]
     },
@@ -391,7 +398,8 @@
         {
           "expr": "sum(rate(api_request_duration_seconds_sum{endpoint=\"/predict\"}[15s])) / sum(rate(api_request_duration_seconds_count{endpoint=\"/predict\"}[15s]))",
           "legendFormat": "Predict Latency",
-          "refId": "A"
+          "refId": "A",
+          "interval": "5s"
         }
       ]
     },
@@ -436,7 +444,8 @@
         {
           "expr": "sum(rate(api_requests_total{endpoint=\"/predict\",http_status=\"500\"}[15s])) / sum(rate(api_requests_total{endpoint=\"/predict\"}[15s]))",
           "legendFormat": "Predict Error Rate",
-          "refId": "A"
+          "refId": "A",
+          "interval": "5s"
         }
       ]
     },
@@ -462,7 +471,8 @@
         {
           "expr": "avg_over_time(model_api_process_cpu_percent[15s])",
           "legendFormat": "cpu %",
-          "refId": "A"
+          "refId": "A",
+          "interval": "5s"
         }
       ]
     },
@@ -479,7 +489,8 @@
         {
           "expr": "model_api_process_resident_memory_bytes",
           "legendFormat": "rss bytes",
-          "refId": "A"
+          "refId": "A",
+          "interval": "5s"
         }
       ]
     },
@@ -496,7 +507,8 @@
         {
           "expr": "model_api_process_disk_utilization_percent",
           "legendFormat": "disk %",
-          "refId": "A"
+          "refId": "A",
+          "interval": "5s"
         }
       ]
     },
@@ -548,7 +560,8 @@
           "expr": "ml_model_info == 1",
           "legendFormat": "Version {{version}}",
           "refId": "A",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         }
       ]
     },
@@ -592,7 +605,8 @@
         {
           "expr": "sum(rate(ml_prediction_value_sum[15s])) / sum(rate(ml_prediction_value_count[15s]))",
           "legendFormat": "mean",
-          "refId": "A"
+          "refId": "A",
+          "interval": "5s"
         }
       ]
     },
@@ -609,7 +623,8 @@
         {
           "expr": "ml_prediction_median_recent",
           "legendFormat": "median",
-          "refId": "A"
+          "refId": "A",
+          "interval": "5s"
         }
       ]
     },
@@ -626,12 +641,14 @@
         {
           "expr": "ml_prediction_min_recent",
           "legendFormat": "min",
-          "refId": "A"
+          "refId": "A",
+          "interval": "5s"
         },
         {
           "expr": "ml_prediction_max_recent",
           "legendFormat": "max",
-          "refId": "B"
+          "refId": "B",
+          "interval": "5s"
         }
       ]
     },
@@ -648,7 +665,8 @@
         {
           "expr": "ml_prediction_stddev_recent",
           "legendFormat": "std deviation",
-          "refId": "A"
+          "refId": "A",
+          "interval": "5s"
         }
       ]
     },
@@ -678,67 +696,78 @@
           "expr": "sum(rate(ml_prediction_value_bucket{le=\"150000.0\"}[15s])) - sum(rate(ml_prediction_value_bucket{le=\"100000.0\"}[15s]))",
           "legendFormat": "100k-150k",
           "refId": "A",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_prediction_value_bucket{le=\"200000.0\"}[15s])) - sum(rate(ml_prediction_value_bucket{le=\"150000.0\"}[15s]))",
           "legendFormat": "150k-200k",
           "refId": "B",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_prediction_value_bucket{le=\"250000.0\"}[15s])) - sum(rate(ml_prediction_value_bucket{le=\"200000.0\"}[15s]))",
           "legendFormat": "200k-250k",
           "refId": "C",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_prediction_value_bucket{le=\"300000.0\"}[15s])) - sum(rate(ml_prediction_value_bucket{le=\"250000.0\"}[15s]))",
           "legendFormat": "250k-300k",
           "refId": "D",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_prediction_value_bucket{le=\"400000.0\"}[15s])) - sum(rate(ml_prediction_value_bucket{le=\"300000.0\"}[15s]))",
           "legendFormat": "300k-400k",
           "refId": "E",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_prediction_value_bucket{le=\"500000.0\"}[15s])) - sum(rate(ml_prediction_value_bucket{le=\"400000.0\"}[15s]))",
           "legendFormat": "400k-500k",
           "refId": "F",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_prediction_value_bucket{le=\"650000.0\"}[15s])) - sum(rate(ml_prediction_value_bucket{le=\"500000.0\"}[15s]))",
           "legendFormat": "500k-650k",
           "refId": "G",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_prediction_value_bucket{le=\"800000.0\"}[15s])) - sum(rate(ml_prediction_value_bucket{le=\"650000.0\"}[15s]))",
           "legendFormat": "650k-800k",
           "refId": "H",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_prediction_value_bucket{le=\"1e+06\"}[15s])) - sum(rate(ml_prediction_value_bucket{le=\"800000.0\"}[15s]))",
           "legendFormat": "800k-1.0M",
           "refId": "I",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_prediction_value_bucket{le=\"1.5e+06\"}[15s])) - sum(rate(ml_prediction_value_bucket{le=\"1e+06\"}[15s]))",
           "legendFormat": "1.0M-1.5M",
           "refId": "J",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_prediction_value_bucket{le=\"+Inf\"}[15s])) - sum(rate(ml_prediction_value_bucket{le=\"1.5e+06\"}[15s]))",
           "legendFormat": ">1.5M",
           "refId": "K",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         }
       ]
     },
@@ -755,7 +784,8 @@
         {
           "expr": "sum(rate(ml_input_square_meters_sum[15s])) / sum(rate(ml_input_square_meters_count[15s]))",
           "legendFormat": "avg square meters",
-          "refId": "A"
+          "refId": "A",
+          "interval": "5s"
         }
       ]
     },
@@ -785,55 +815,64 @@
           "expr": "sum(rate(ml_input_square_meters_bucket{le=\"100.0\"}[15s])) - sum(rate(ml_input_square_meters_bucket{le=\"50.0\"}[15s]))",
           "legendFormat": "50-100",
           "refId": "A",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_input_square_meters_bucket{le=\"150.0\"}[15s])) - sum(rate(ml_input_square_meters_bucket{le=\"100.0\"}[15s]))",
           "legendFormat": "100-150",
           "refId": "B",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_input_square_meters_bucket{le=\"200.0\"}[15s])) - sum(rate(ml_input_square_meters_bucket{le=\"150.0\"}[15s]))",
           "legendFormat": "150-200",
           "refId": "C",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_input_square_meters_bucket{le=\"250.0\"}[15s])) - sum(rate(ml_input_square_meters_bucket{le=\"200.0\"}[15s]))",
           "legendFormat": "200-250",
           "refId": "D",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_input_square_meters_bucket{le=\"300.0\"}[15s])) - sum(rate(ml_input_square_meters_bucket{le=\"250.0\"}[15s]))",
           "legendFormat": "250-300",
           "refId": "E",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_input_square_meters_bucket{le=\"400.0\"}[15s])) - sum(rate(ml_input_square_meters_bucket{le=\"300.0\"}[15s]))",
           "legendFormat": "300-400",
           "refId": "F",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_input_square_meters_bucket{le=\"500.0\"}[15s])) - sum(rate(ml_input_square_meters_bucket{le=\"400.0\"}[15s]))",
           "legendFormat": "400-500",
           "refId": "G",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_input_square_meters_bucket{le=\"650.0\"}[15s])) - sum(rate(ml_input_square_meters_bucket{le=\"500.0\"}[15s]))",
           "legendFormat": "500-650",
           "refId": "H",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_input_square_meters_bucket{le=\"+Inf\"}[15s])) - sum(rate(ml_input_square_meters_bucket{le=\"650.0\"}[15s]))",
           "legendFormat": ">650",
           "refId": "I",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         }
       ]
     },
@@ -850,7 +889,8 @@
         {
           "expr": "sum(rate(ml_input_bedrooms_sum[15s])) / sum(rate(ml_input_bedrooms_count[15s]))",
           "legendFormat": "avg bedrooms",
-          "refId": "A"
+          "refId": "A",
+          "interval": "5s"
         }
       ]
     },
@@ -880,55 +920,64 @@
           "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"1.0\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"0.0\"}[15s]))",
           "legendFormat": "0-1",
           "refId": "A",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"2.0\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"1.0\"}[15s]))",
           "legendFormat": "1-2",
           "refId": "B",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"3.0\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"2.0\"}[15s]))",
           "legendFormat": "2-3",
           "refId": "C",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"4.0\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"3.0\"}[15s]))",
           "legendFormat": "3-4",
           "refId": "D",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"5.0\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"4.0\"}[15s]))",
           "legendFormat": "4-5",
           "refId": "E",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"6.0\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"5.0\"}[15s]))",
           "legendFormat": "5-6",
           "refId": "F",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"7.0\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"6.0\"}[15s]))",
           "legendFormat": "6-7",
           "refId": "G",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"8.0\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"7.0\"}[15s]))",
           "legendFormat": "7-8",
           "refId": "H",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"+Inf\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"8.0\"}[15s]))",
           "legendFormat": ">8",
           "refId": "I",
-          "instant": true
+          "instant": true,
+          "interval": "5s"
         }
       ]
     },
@@ -945,7 +994,8 @@
         {
           "expr": "sum(rate(ml_input_neighborhood_total[15s])) by (neighborhood)",
           "legendFormat": "{{neighborhood}}",
-          "refId": "A"
+          "refId": "A",
+          "interval": "5s"
         }
       ]
     },
@@ -989,7 +1039,8 @@
         {
           "expr": "sum(rate(ml_missing_feature_total[15s])) by (feature)",
           "legendFormat": "{{feature}}",
-          "refId": "A"
+          "refId": "A",
+          "interval": "5s"
         }
       ]
     }

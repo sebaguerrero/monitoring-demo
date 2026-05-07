@@ -2,7 +2,7 @@
   "uid": "ml-system",
   "title": "ML System Dashboard",
   "schemaVersion": 30,
-  "version": 13,
+  "version": 15,
   "refresh": "5s",
   "time": {
     "from": "now-15m",
@@ -812,7 +812,12 @@
           "instant": true,
           "interval": "5s"
         }
-      ]
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        }
+      }
     },
     {
       "title": "Square Meters Mean",
@@ -923,7 +928,12 @@
           "instant": true,
           "interval": "5s"
         }
-      ]
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        }
+      }
     },
     {
       "title": "Bedrooms Mean",
@@ -973,56 +983,56 @@
       "targets": [
         {
           "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"1.0\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"0.0\"}[15s]))",
-          "legendFormat": "0-1",
+          "legendFormat": "1",
           "refId": "A",
           "instant": true,
           "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"2.0\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"1.0\"}[15s]))",
-          "legendFormat": "1-2",
+          "legendFormat": "2",
           "refId": "B",
           "instant": true,
           "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"3.0\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"2.0\"}[15s]))",
-          "legendFormat": "2-3",
+          "legendFormat": "3",
           "refId": "C",
           "instant": true,
           "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"4.0\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"3.0\"}[15s]))",
-          "legendFormat": "3-4",
+          "legendFormat": "4",
           "refId": "D",
           "instant": true,
           "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"5.0\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"4.0\"}[15s]))",
-          "legendFormat": "4-5",
+          "legendFormat": "5",
           "refId": "E",
           "instant": true,
           "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"6.0\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"5.0\"}[15s]))",
-          "legendFormat": "5-6",
+          "legendFormat": "6",
           "refId": "F",
           "instant": true,
           "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"7.0\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"6.0\"}[15s]))",
-          "legendFormat": "6-7",
+          "legendFormat": "7",
           "refId": "G",
           "instant": true,
           "interval": "5s"
         },
         {
           "expr": "sum(rate(ml_input_bedrooms_bucket{le=\"8.0\"}[15s])) - sum(rate(ml_input_bedrooms_bucket{le=\"7.0\"}[15s]))",
-          "legendFormat": "7-8",
+          "legendFormat": "8",
           "refId": "H",
           "instant": true,
           "interval": "5s"
@@ -1034,7 +1044,12 @@
           "instant": true,
           "interval": "5s"
         }
-      ]
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        }
+      }
     },
     {
       "title": "Neighborhood Mix",

@@ -2,7 +2,7 @@
   "uid": "ml-system",
   "title": "ML System Dashboard",
   "schemaVersion": 30,
-  "version": 6,
+  "version": 13,
   "refresh": "5s",
   "time": {
     "from": "now-15m",
@@ -355,7 +355,12 @@
           "refId": "A",
           "interval": "5s"
         }
-      ]
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        }
+      }
     },
     {
       "title": "Predict Latency",
@@ -464,13 +469,15 @@
           "color": {
             "mode": "fixed",
             "fixedColor": "green"
-          }
+          },
+          "min": 0,
+          "max": 100
         }
       },
       "targets": [
         {
           "expr": "avg_over_time(model_api_process_cpu_percent[15s])",
-          "legendFormat": "cpu %",
+          "legendFormat": "CPU",
           "refId": "A",
           "interval": "5s"
         }
@@ -487,12 +494,20 @@
       },
       "targets": [
         {
-          "expr": "model_api_process_resident_memory_bytes",
-          "legendFormat": "rss bytes",
+          "expr": "model_api_process_resident_memory_bytes / 1073741824",
+          "legendFormat": "RAM",
           "refId": "A",
           "interval": "5s"
         }
-      ]
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "gbytes",
+          "decimals": 2,
+          "min": 0,
+          "max": 8
+        }
+      }
     },
     {
       "title": "Disk Utilization",
@@ -506,11 +521,19 @@
       "targets": [
         {
           "expr": "model_api_process_disk_utilization_percent",
-          "legendFormat": "disk %",
+          "legendFormat": "Disk",
           "refId": "A",
           "interval": "5s"
         }
-      ]
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 2,
+          "min": 0,
+          "max": 100
+        }
+      }
     },
     {
       "title": "ML Metrics",
@@ -598,13 +621,15 @@
                 "value": 600000
               }
             ]
-          }
+          },
+          "unit": "currencyUSD",
+          "decimals": 2
         }
       },
       "targets": [
         {
           "expr": "sum(rate(ml_prediction_value_sum[15s])) / sum(rate(ml_prediction_value_count[15s]))",
-          "legendFormat": "mean",
+          "legendFormat": "Mean",
           "refId": "A",
           "interval": "5s"
         }
@@ -622,11 +647,17 @@
       "targets": [
         {
           "expr": "ml_prediction_median_recent",
-          "legendFormat": "median",
+          "legendFormat": "Median",
           "refId": "A",
           "interval": "5s"
         }
-      ]
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 2
+        }
+      }
     },
     {
       "title": "Prediction Min/Max",
@@ -640,17 +671,23 @@
       "targets": [
         {
           "expr": "ml_prediction_min_recent",
-          "legendFormat": "min",
+          "legendFormat": "Min",
           "refId": "A",
           "interval": "5s"
         },
         {
           "expr": "ml_prediction_max_recent",
-          "legendFormat": "max",
+          "legendFormat": "Max",
           "refId": "B",
           "interval": "5s"
         }
-      ]
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 2
+        }
+      }
     },
     {
       "title": "Prediction Standard Deviation",
@@ -664,11 +701,17 @@
       "targets": [
         {
           "expr": "ml_prediction_stddev_recent",
-          "legendFormat": "std deviation",
+          "legendFormat": "Std Deviation",
           "refId": "A",
           "interval": "5s"
         }
-      ]
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 2
+        }
+      }
     },
     {
       "title": "Prediction Histogram Buckets",
@@ -783,11 +826,17 @@
       "targets": [
         {
           "expr": "sum(rate(ml_input_square_meters_sum[15s])) / sum(rate(ml_input_square_meters_count[15s]))",
-          "legendFormat": "avg square meters",
+          "legendFormat": "Avg Square Meters",
           "refId": "A",
           "interval": "5s"
         }
-      ]
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:m\u00b2",
+          "decimals": 0
+        }
+      }
     },
     {
       "title": "Square Meters Histogram Buckets",
@@ -888,11 +937,17 @@
       "targets": [
         {
           "expr": "sum(rate(ml_input_bedrooms_sum[15s])) / sum(rate(ml_input_bedrooms_count[15s]))",
-          "legendFormat": "avg bedrooms",
+          "legendFormat": "Avg Bedrooms",
           "refId": "A",
           "interval": "5s"
         }
-      ]
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:beds",
+          "decimals": 1
+        }
+      }
     },
     {
       "title": "Bedrooms Histogram Buckets",
@@ -997,7 +1052,63 @@
           "refId": "A",
           "interval": "5s"
         }
-      ]
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "decimals": 1
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "downtown"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Downtown"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "industrial"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Industrial"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "rural"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Rural"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "suburb"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Suburb"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "title": "Missing Features",
@@ -1032,8 +1143,24 @@
                 "value": 0.5
               }
             ]
+          },
+          "unit": "reqps",
+          "decimals": 1
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "bedrooms"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Bedrooms"
+              }
+            ]
           }
-        }
+        ]
       },
       "targets": [
         {
